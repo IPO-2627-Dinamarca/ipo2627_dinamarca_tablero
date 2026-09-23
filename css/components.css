@@ -1,0 +1,578 @@
+/* COMPONENTES: bloques con notación BEM (bloque__elemento--modificador) y anidamiento.
+   Composición: Flexbox para las disposiciones en una dirección (panel, botones, marcador)
+   y Grid para las bidimensionales (tablero, filas de aspecto).
+   Posicionamiento (position) solo para la asistencia al usuario, que debe superponerse
+   sin alterar el flujo: marcas de ayuda en las celdas, mensajes emergentes, capa de
+   victoria sobre el tablero y el control nativo de las opciones de tamaño. */
+@layer componentes {
+  /* ---------- Cabecera ---------- */
+  .cabecera__titulo {
+    font-size: var(--texto-xxl);
+    font-weight: var(--peso-fuerte);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .cabecera__lema {
+    color: var(--texto-suave);
+    font-size: var(--texto-l);
+  }
+
+  /* ---------- Panel lateral ---------- */
+  .panel__seccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-4);
+    padding: var(--espacio-5);
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-grande);
+  }
+
+  .panel__titulo {
+    font-size: var(--texto-xs);
+    font-weight: var(--peso-fuerte);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-2);
+  }
+
+  .ajustes__aviso {
+    font-size: var(--texto-s);
+    color: var(--texto-suave);
+  }
+
+  /* ---------- Botones ---------- */
+  .boton {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--espacio-2) var(--espacio-4);
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+    transition:
+      background-color var(--duracion),
+      border-color var(--duracion);
+
+    &:hover {
+      background: var(--acento-fondo);
+      border-color: var(--acento);
+    }
+  }
+
+  .boton--principal {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--texto-sobre-acento);
+
+    &:hover {
+      background: color-mix(in hsl, var(--acento), var(--texto) 18%);
+      border-color: color-mix(in hsl, var(--acento), var(--texto) 18%);
+    }
+  }
+
+  /* Mensaje emergente: se posiciona sobre el botón sin desplazar nada al aparecer. */
+  .ayuda-emergente {
+    position: relative;
+
+    &::after {
+      content: attr(data-ayuda);
+      position: absolute;
+      bottom: calc(100% + var(--espacio-2));
+      left: 50%;
+      z-index: 5;
+      width: max-content;
+      max-width: 15rem;
+      padding: var(--espacio-2) var(--espacio-3);
+      background: var(--texto);
+      color: var(--fondo);
+      border-radius: var(--radio);
+      font-size: var(--texto-xs);
+      font-weight: var(--peso-normal);
+      line-height: 1.4;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, var(--espacio-1));
+      transition:
+        opacity var(--duracion),
+        transform var(--duracion);
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  /* ---------- Campos de formulario ---------- */
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-1);
+    min-width: 0;
+  }
+
+  .campo__etiqueta,
+  .grupo__leyenda {
+    font-size: var(--texto-s);
+    font-weight: var(--peso-medio);
+  }
+
+  .campo__control {
+    width: 100%;
+    padding: var(--espacio-2);
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--acento);
+    }
+  }
+
+  .grupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-3);
+  }
+
+  /* Botones de opción "segmentados": el radio nativo cubre toda la opción (posicionado
+     y transparente), así conserva el teclado y la accesibilidad del control estándar. */
+  .segmentado {
+    display: flex;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    overflow: hidden;
+  }
+
+  .segmentado__opcion {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: var(--espacio-2) var(--espacio-1);
+    font-size: var(--texto-s);
+    cursor: pointer;
+    transition: background-color var(--duracion);
+
+    & + & {
+      border-left: 1px solid var(--borde);
+    }
+
+    &:hover {
+      background: var(--acento-fondo);
+    }
+
+    &:has(:checked) {
+      background: var(--acento);
+      color: var(--texto-sobre-acento);
+      font-weight: var(--peso-medio);
+    }
+
+    &:has(:focus-visible) {
+      outline: 3px solid var(--texto);
+      outline-offset: -5px;
+    }
+  }
+
+  .segmentado__radio {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .aspecto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-3);
+  }
+
+  .aspecto__ficha {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--espacio-2);
+  }
+
+  .aspecto__muestra {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: var(--celda-fondo);
+    border-radius: var(--radio);
+  }
+
+  /* ---------- Marcador ---------- */
+  .marcador {
+    display: flex;
+    gap: var(--espacio-6);
+  }
+
+  .marcador__dato {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .marcador__etiqueta {
+    font-size: var(--texto-xs);
+    font-weight: var(--peso-medio);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .marcador__valor {
+    font-size: var(--texto-xl);
+    font-weight: var(--peso-fuerte);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Tablero ---------- */
+  /* El marco es la referencia de posicionamiento de la capa de victoria. */
+  .marco {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: min(20rem, 100%);
+    min-height: 13rem;
+    padding: var(--espacio-4);
+    background: var(--tablero-fondo);
+    border-radius: var(--radio-grande);
+    box-shadow: 0 0.5rem 1.5rem var(--sombra);
+  }
+
+  /* Rejilla N×N (+ una columna estrecha con la marca de fila completa).
+     --n llega desde JS; el lado de celda es el del tamaño elegido, salvo que no quepa
+     en el ancho disponible (100cqi = ancho del contenedor .juego). */
+  .tablero {
+    --celda-tamano: var(--celda-mediana);
+    --celda: min(var(--celda-tamano), calc((100cqi - 2 * var(--espacio-4)) / (var(--n, 5) * 1.1 + 1)));
+
+    display: grid;
+    grid-template-columns: repeat(var(--n, 5), var(--celda)) calc(var(--celda) * 0.5);
+    grid-auto-rows: var(--celda);
+    gap: calc(var(--celda) * 0.08);
+  }
+
+  .tablero--pequena {
+    --celda-tamano: var(--celda-pequena);
+  }
+
+  .tablero--mediana {
+    --celda-tamano: var(--celda-mediana);
+  }
+
+  .tablero--grande {
+    --celda-tamano: var(--celda-grande);
+  }
+
+  /* La fila solo agrupa (semántica role="row"); sus celdas participan en la rejilla. */
+  .tablero__fila {
+    display: contents;
+  }
+
+  .tablero__marca {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    justify-self: end;
+    width: 80%;
+    aspect-ratio: 1;
+    border: 2px solid var(--celda-fondo-completa);
+    border-radius: 50%;
+    color: var(--ayuda-texto);
+    font-size: calc(var(--celda) * 0.25);
+    font-weight: var(--peso-fuerte);
+    transition:
+      background-color var(--duracion),
+      border-color var(--duracion);
+  }
+
+  .tablero__marca--completa {
+    background: var(--ayuda-seleccion);
+    border-color: var(--ayuda-seleccion);
+  }
+
+  /* ---------- Celda ---------- */
+  /* position: relative → referencia de las marcas de ayuda (::after) de la esquina. */
+  .celda {
+    position: relative;
+    display: grid;
+    place-items: center;
+    background: var(--celda-fondo);
+    border-radius: calc(var(--celda) * 0.18);
+    transition:
+      background-color var(--duracion),
+      box-shadow var(--duracion);
+
+    &:hover .ficha {
+      transform: scale(1.06);
+    }
+
+    /* El foco se dibuja en la celda: el recorte (clip-path) de la ficha ocultaría su contorno. */
+    &:has(.ficha:focus-visible) {
+      outline: 3px solid var(--ayuda-pista);
+      outline-offset: 2px;
+    }
+
+    /* Marca de ayuda en la esquina superior derecha (solo si un modificador da contenido). */
+    &::after {
+      position: absolute;
+      top: calc(var(--celda) * -0.12);
+      right: calc(var(--celda) * -0.12);
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: max(1.1rem, calc(var(--celda) * 0.36));
+      aspect-ratio: 1;
+      background: var(--ayuda-pista);
+      color: var(--ayuda-texto);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px var(--sombra);
+      font-size: max(0.7rem, calc(var(--celda) * 0.22));
+      font-weight: var(--peso-fuerte);
+      line-height: 1;
+      pointer-events: none;
+    }
+  }
+
+  .celda--completa {
+    background: var(--celda-fondo-completa);
+  }
+
+  .celda--seleccionada {
+    box-shadow: 0 0 0 3px var(--ayuda-seleccion);
+
+    & .ficha,
+    &:hover .ficha {
+      transform: scale(1.14);
+    }
+  }
+
+  .celda--pista {
+    box-shadow: 0 0 0 2px var(--ayuda-pista);
+
+    &::after {
+      content: "?";
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .celda--pista {
+      animation: latido 1.2s ease-in-out infinite;
+    }
+  }
+
+  .celda--origen {
+    outline: 2px dashed var(--ayuda-seleccion);
+    outline-offset: -4px;
+  }
+
+  .celda--destino {
+    background: var(--celda-fondo-completa);
+    box-shadow: 0 0 0 3px var(--ayuda-seleccion);
+
+    & .ficha {
+      transform: scale(0.88);
+    }
+
+    &::after {
+      content: "⇄";
+    }
+  }
+
+  /* ---------- Ficha: forma (clip-path / border-radius) y color (variable) ---------- */
+  .ficha {
+    display: block;
+    width: var(--proporcion-ficha);
+    aspect-ratio: 1;
+    background-color: var(--color-ficha);
+    /* Brillo suave para dar volumen, sin cambiar el tono de la ficha. */
+    background-image: radial-gradient(circle at 35% 30%, hsl(0, 0%, 100%, 0.35), transparent 60%);
+    cursor: grab;
+    transition:
+      transform var(--duracion),
+      opacity var(--duracion);
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .ficha--muestra {
+    width: 70%;
+    cursor: default;
+  }
+
+  .ficha--arrastrada {
+    opacity: 0.3;
+  }
+
+  .ficha--movida {
+    animation: aparicion calc(var(--duracion) * 2) ease-out;
+  }
+
+  .ficha--circulo {
+    border-radius: 50%;
+  }
+
+  .ficha--cuadrado {
+    border-radius: 14%;
+    scale: 0.92;
+  }
+
+  .ficha--triangulo {
+    clip-path: polygon(50% 4%, 98% 92%, 2% 92%);
+  }
+
+  .ficha--rombo {
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  .ficha--hexagono {
+    clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
+  }
+
+  .ficha--estrella {
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 71%, 21% 92%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .ficha--rojo {
+    --color-ficha: var(--color-rojo);
+  }
+
+  .ficha--ambar {
+    --color-ficha: var(--color-ambar);
+  }
+
+  .ficha--verde {
+    --color-ficha: var(--color-verde);
+  }
+
+  .ficha--turquesa {
+    --color-ficha: var(--color-turquesa);
+  }
+
+  .ficha--azul {
+    --color-ficha: var(--color-azul);
+  }
+
+  .ficha--violeta {
+    --color-ficha: var(--color-violeta);
+  }
+
+  /* ---------- Capa de victoria: se superpone al tablero terminado ---------- */
+  .victoria {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--espacio-3);
+    padding: var(--espacio-4);
+    background: hsl(var(--matiz-interfaz), 25%, 8%, 0.8);
+    border-radius: inherit;
+    color: hsl(var(--matiz-interfaz), 40%, 96%);
+    text-align: center;
+    backdrop-filter: blur(2px);
+    animation: aparicion calc(var(--duracion) * 2) ease-out;
+  }
+
+  .victoria__titulo {
+    font-size: var(--texto-xl);
+    font-weight: var(--peso-fuerte);
+  }
+
+  /* ---------- Mensajes ---------- */
+  .mensaje {
+    min-height: 3em; /* reserva hueco para dos líneas: el tablero no salta al cambiar el texto */
+    max-width: var(--medida);
+    text-align: center;
+    font-weight: var(--peso-medio);
+  }
+
+  .instrucciones {
+    max-width: var(--medida);
+    text-align: center;
+    font-size: var(--texto-s);
+    color: var(--texto-suave);
+  }
+
+  /* ---------- Ventana de ayuda (dialog nativo) ---------- */
+  .dialogo {
+    max-width: min(34rem, 100% - 2rem);
+    padding: var(--espacio-5);
+    background: var(--superficie);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-grande);
+    box-shadow: 0 1rem 2rem var(--sombra);
+
+    &::backdrop {
+      background: hsl(var(--matiz-interfaz), 30%, 8%, 0.6);
+    }
+  }
+
+  .dialogo__contenido {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-4);
+  }
+
+  .dialogo__titulo {
+    font-size: var(--texto-xl);
+    font-weight: var(--peso-fuerte);
+  }
+
+  .dialogo__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-2);
+    padding-left: 1.25em;
+  }
+
+  .dialogo__cerrar {
+    align-self: flex-end;
+  }
+
+  /* ---------- Pie ---------- */
+  .pie {
+    font-size: var(--texto-s);
+    color: var(--texto-suave);
+  }
+
+  /* ---------- Animaciones ---------- */
+  @keyframes aparicion {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+  }
+
+  @keyframes latido {
+    50% {
+      box-shadow: 0 0 0 6px var(--ayuda-pista);
+    }
+  }
+}

@@ -1,0 +1,111 @@
+/* Orden de las capas: una capa posterior gana a una anterior sea cual sea la
+   especificidad del selector, así no hacen falta !important ni selectores largos. */
+@layer tokens, base, layout, componentes;
+
+/*
+  ESTRATEGIA CROMÁTICA (sistema HSL, parametrizada con var() y calc())
+  - Interfaz MONOCROMÁTICA: un único tono (--matiz-interfaz, azul pizarra) del que salen,
+    variando solo saturación y luminosidad, fondos, textos, bordes y el color de acento.
+    Así la interfaz no compite con las fichas, que son lo único con color de verdad.
+  - Fichas: seis tonos repartidos cada 60° en el círculo cromático a partir de
+    --matiz-fichas (H, H+60, … H+300). Por defecto se usa una TRÍADA (H, H+120, H+240:
+    rojo, verde y azul), la combinación de tres colores más separados entre sí.
+  - El tablero es oscuro en los dos modos: fondo neutro sobre el que destacan las fichas
+    (contraste figura/fondo). Las ayudas sobre el tablero usan tonos muy claros.
+  - Accesibilidad: los tipos se distinguen también por la forma (nunca solo por color),
+    y los pares texto/fondo cumplen contraste WCAG AA (≥ 4,5:1).
+  Modo claro/oscuro automático con light-dark() según la preferencia del sistema.
+
+  ESTRATEGIA TIPOGRÁFICA · una única fuente con niveles de realce
+  - Fuente del sistema (system-ui): legible, sin descargas y bien escalable.
+  - La jerarquía se consigue con tamaño (escala modular de razón 1,25), grosor
+    (400 / 600 / 800) y, en las etiquetas pequeñas, versalitas con espaciado.
+  - Cifras tabulares en el marcador para que no "bailen" al cambiar.
+
+  ESTRATEGIA ESPACIAL
+  - Espaciado en rem con una escala doble (0,25 → 0,5 → 1 → 2) más pasos intermedios.
+  - Tamaño de celda en rem según el tamaño de ficha elegido, limitado por el ancho del
+    contenedor (unidades cqi) para que el tablero quepa siempre.
+  - Gestalt: proximidad (celdas de una fila juntas, grupos de ajustes separados),
+    similitud (mismo tipo = misma forma y color), cierre (marco del tablero),
+    figura/fondo (fichas vivas sobre tablero oscuro) y región común (paneles).
+*/
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* --- Color: interfaz monocromática --- */
+    --matiz-interfaz: 225;
+
+    --fondo: light-dark(hsl(var(--matiz-interfaz), 30%, 96%), hsl(var(--matiz-interfaz), 20%, 10%));
+    --superficie: light-dark(hsl(var(--matiz-interfaz), 40%, 99%), hsl(var(--matiz-interfaz), 18%, 15%));
+    --borde: light-dark(hsl(var(--matiz-interfaz), 20%, 84%), hsl(var(--matiz-interfaz), 14%, 28%));
+    --texto: light-dark(hsl(var(--matiz-interfaz), 30%, 14%), hsl(var(--matiz-interfaz), 30%, 92%));
+    --texto-suave: light-dark(hsl(var(--matiz-interfaz), 12%, 38%), hsl(var(--matiz-interfaz), 12%, 70%));
+    --acento: light-dark(hsl(var(--matiz-interfaz), 70%, 42%), hsl(var(--matiz-interfaz), 90%, 74%));
+    --acento-fondo: light-dark(hsl(var(--matiz-interfaz), 70%, 92%), hsl(var(--matiz-interfaz), 40%, 24%));
+    --texto-sobre-acento: light-dark(hsl(var(--matiz-interfaz), 40%, 99%), hsl(var(--matiz-interfaz), 40%, 10%));
+
+    /* Tablero: siempre oscuro, con celdas algo más claras que el marco. */
+    --tablero-fondo: hsl(var(--matiz-interfaz), 25%, 16%);
+    --celda-fondo: hsl(var(--matiz-interfaz), 20%, 23%);
+    --celda-fondo-completa: hsl(var(--matiz-interfaz), 30%, 30%);
+    --ayuda-seleccion: hsl(var(--matiz-interfaz), 100%, 88%);
+    --ayuda-pista: hsl(var(--matiz-interfaz), 100%, 97%);
+    --ayuda-texto: hsl(var(--matiz-interfaz), 40%, 12%);
+    --sombra: hsl(var(--matiz-interfaz), 40%, 5%, 0.35);
+
+    /* --- Color: fichas (círculo cromático cada 60°) --- */
+    --matiz-fichas: 355;
+    --saturacion-fichas: 75%;
+    --luz-fichas: 58%;
+
+    --color-rojo: hsl(var(--matiz-fichas), var(--saturacion-fichas), var(--luz-fichas));
+    --color-ambar: hsl(calc(var(--matiz-fichas) + 60), var(--saturacion-fichas), var(--luz-fichas));
+    --color-verde: hsl(calc(var(--matiz-fichas) + 120), var(--saturacion-fichas), var(--luz-fichas));
+    --color-turquesa: hsl(calc(var(--matiz-fichas) + 180), var(--saturacion-fichas), var(--luz-fichas));
+    --color-azul: hsl(calc(var(--matiz-fichas) + 240), var(--saturacion-fichas), var(--luz-fichas));
+    --color-violeta: hsl(calc(var(--matiz-fichas) + 300), var(--saturacion-fichas), var(--luz-fichas));
+
+    /* --- Tipografía: una familia, varios niveles de realce --- */
+    --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+    --texto-xs: 0.8rem;
+    --texto-s: 0.9rem;
+    --texto-m: 1rem;
+    --texto-l: 1.25rem;
+    --texto-xl: 1.563rem;
+    --texto-xxl: 2.441rem;
+
+    --peso-normal: 400;
+    --peso-medio: 600;
+    --peso-fuerte: 800;
+
+    /* --- Espacio --- */
+    --espacio-1: 0.25rem;
+    --espacio-2: 0.5rem;
+    --espacio-3: 0.75rem;
+    --espacio-4: 1rem;
+    --espacio-5: 1.5rem;
+    --espacio-6: 2rem;
+
+    --radio: 0.5rem;
+    --radio-grande: 1rem;
+    --medida: 60ch;
+
+    /* Lado de la celda para cada tamaño de ficha; la ficha ocupa el 76 % de la celda. */
+    --celda-pequena: 2.5rem;
+    --celda-mediana: 3.5rem;
+    --celda-grande: 4.75rem;
+    --proporcion-ficha: 76%;
+
+    /* --- Movimiento --- */
+    --duracion: 0.18s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duracion: 0s;
+    }
+  }
+}

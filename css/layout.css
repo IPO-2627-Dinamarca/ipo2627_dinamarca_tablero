@@ -1,0 +1,68 @@
+/* LAYOUT: reparto de la página (composición bidimensional con Grid y áreas con nombre).
+   Escritorio: panel de ajustes a la izquierda y juego a la derecha.
+   Pantallas estrechas (< 56rem): una sola columna, con el juego antes que los ajustes. */
+@layer layout {
+  .app {
+    display: grid;
+    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "cabecera cabecera"
+      "panel    juego"
+      "pie      pie";
+    gap: var(--espacio-6);
+    max-width: 78rem;
+    min-height: 100vh;
+    margin-inline: auto;
+    padding: var(--espacio-5) var(--espacio-5) var(--espacio-4);
+  }
+
+  .cabecera {
+    grid-area: cabecera;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--espacio-2) var(--espacio-5);
+    padding-bottom: var(--espacio-4);
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .panel {
+    grid-area: panel;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-5);
+  }
+
+  /* El juego es un contenedor de consulta: el tablero calcula su tamaño con su ancho (cqi). */
+  .juego {
+    grid-area: juego;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacio-4);
+  }
+
+  .pie {
+    grid-area: pie;
+    display: flex;
+    justify-content: center;
+    padding-top: var(--espacio-4);
+    border-top: 1px solid var(--borde);
+  }
+
+  @media (width < 56rem) {
+    .app {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "cabecera"
+        "juego"
+        "panel"
+        "pie";
+      gap: var(--espacio-5);
+      padding: var(--espacio-4);
+    }
+  }
+}
