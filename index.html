@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tablero · Juego de fichas</title>
+  <meta name="description" content="Juego de fichas: intercambia fichas hasta que cada fila tenga un solo tipo.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:,">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="salto" href="#juego">Saltar al tablero</a>
+
+  <div class="app">
+    <header class="cabecera">
+      <h1 class="cabecera__titulo">Tablero</h1>
+      <p class="cabecera__lema">Una fila, un tipo de ficha</p>
+    </header>
+
+    <aside class="panel" aria-label="Partida y ajustes">
+      <section class="panel__seccion" aria-labelledby="partida-titulo">
+        <h2 class="panel__titulo" id="partida-titulo">Partida</h2>
+        <div class="acciones">
+          <button type="button" class="boton boton--principal" data-accion="nueva">Nueva partida</button>
+          <button type="button" class="boton ayuda-emergente" data-accion="pista"
+                  data-ayuda="Resalta dos fichas cuyo intercambio te acerca a la solución">Pista</button>
+          <button type="button" class="boton" data-accion="ayuda" aria-haspopup="dialog">Cómo se juega</button>
+        </div>
+      </section>
+
+      <form class="panel__seccion ajustes" data-vista="ajustes" aria-labelledby="ajustes-titulo">
+        <h2 class="panel__titulo" id="ajustes-titulo">Ajustes</h2>
+        <p class="ajustes__aviso">Cualquier cambio empieza una partida nueva.</p>
+
+        <label class="campo">
+          <span class="campo__etiqueta">Dimensión del tablero</span>
+          <select class="campo__control" data-control="dimension"></select>
+        </label>
+
+        <fieldset class="grupo">
+          <legend class="grupo__leyenda">Tamaño de las fichas</legend>
+          <div class="segmentado">
+            <label class="segmentado__opcion">
+              <input class="segmentado__radio" type="radio" name="tamano" value="pequena" data-control="tamano">
+              <span class="segmentado__texto">Pequeña</span>
+            </label>
+            <label class="segmentado__opcion">
+              <input class="segmentado__radio" type="radio" name="tamano" value="mediana" data-control="tamano">
+              <span class="segmentado__texto">Mediana</span>
+            </label>
+            <label class="segmentado__opcion">
+              <input class="segmentado__radio" type="radio" name="tamano" value="grande" data-control="tamano">
+              <span class="segmentado__texto">Grande</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__leyenda">Aspecto de las fichas</legend>
+          <div class="aspecto">
+            <div class="aspecto__ficha" role="group" aria-label="Ficha 1">
+              <span class="aspecto__muestra" aria-hidden="true"><span class="ficha ficha--muestra" data-vista="muestra" data-tipo="0"></span></span>
+              <label class="campo">
+                <span class="campo__etiqueta">Forma</span>
+                <select class="campo__control" data-control="forma" data-tipo="0"></select>
+              </label>
+              <label class="campo">
+                <span class="campo__etiqueta">Color</span>
+                <select class="campo__control" data-control="color" data-tipo="0"></select>
+              </label>
+            </div>
+            <div class="aspecto__ficha" role="group" aria-label="Ficha 2">
+              <span class="aspecto__muestra" aria-hidden="true"><span class="ficha ficha--muestra" data-vista="muestra" data-tipo="1"></span></span>
+              <label class="campo">
+                <span class="campo__etiqueta">Forma</span>
+                <select class="campo__control" data-control="forma" data-tipo="1"></select>
+              </label>
+              <label class="campo">
+                <span class="campo__etiqueta">Color</span>
+                <select class="campo__control" data-control="color" data-tipo="1"></select>
+              </label>
+            </div>
+            <div class="aspecto__ficha" role="group" aria-label="Ficha 3">
+              <span class="aspecto__muestra" aria-hidden="true"><span class="ficha ficha--muestra" data-vista="muestra" data-tipo="2"></span></span>
+              <label class="campo">
+                <span class="campo__etiqueta">Forma</span>
+                <select class="campo__control" data-control="forma" data-tipo="2"></select>
+              </label>
+              <label class="campo">
+                <span class="campo__etiqueta">Color</span>
+                <select class="campo__control" data-control="color" data-tipo="2"></select>
+              </label>
+            </div>
+          </div>
+          <p class="ajustes__aviso">Si eliges una forma o un color que ya usa otra ficha, las dos se lo intercambian.</p>
+        </fieldset>
+      </form>
+    </aside>
+
+    <main class="juego" id="juego">
+      <dl class="marcador">
+        <div class="marcador__dato">
+          <dt class="marcador__etiqueta">Movimientos</dt>
+          <dd class="marcador__valor"><output data-vista="movimientos">0</output></dd>
+        </div>
+        <div class="marcador__dato">
+          <dt class="marcador__etiqueta">Filas completas</dt>
+          <dd class="marcador__valor"><output data-vista="filas">0</output></dd>
+        </div>
+      </dl>
+
+      <div class="marco">
+        <div class="tablero" role="grid" data-vista="tablero" aria-describedby="instrucciones">
+          <noscript>Este juego necesita JavaScript.</noscript>
+        </div>
+
+        <section class="victoria" data-vista="victoria" aria-labelledby="victoria-titulo" hidden>
+          <h2 class="victoria__titulo" id="victoria-titulo">¡Enhorabuena!</h2>
+          <p class="victoria__texto" data-vista="resumen-victoria"></p>
+          <button type="button" class="boton boton--principal" data-accion="revancha">Jugar otra vez</button>
+        </section>
+      </div>
+
+      <p class="mensaje" data-vista="mensaje" role="status" aria-live="polite"></p>
+      <p class="instrucciones" id="instrucciones">
+        Arrastra una ficha sobre otra para intercambiarlas, o pulsa (Intro) una y después la otra.
+        Con el teclado: flechas para moverte, Esc para cancelar.
+      </p>
+    </main>
+
+    <footer class="pie">
+      <p>Grupo Dinamarca · IPO 2026/27</p>
+    </footer>
+  </div>
+
+  <dialog class="dialogo" data-vista="ayuda" aria-labelledby="ayuda-titulo">
+    <form class="dialogo__contenido" method="dialog">
+      <h2 class="dialogo__titulo" id="ayuda-titulo">Cómo se juega</h2>
+      <ol class="dialogo__lista">
+        <li><strong>Objetivo:</strong> que cada fila del tablero tenga fichas de un único tipo (misma forma y color).</li>
+        <li><strong>Movimiento:</strong> intercambia dos fichas cualesquiera, estén donde estén. Arrástrala sobre la otra, o selecciónalas una tras otra con un clic.</li>
+        <li><strong>Ayudas:</strong> la marca ✓ al final de una fila indica que ya está completa; el botón <em>Pista</em> resalta un intercambio útil.</li>
+        <li><strong>Siempre tiene solución:</strong> de cada tipo hay fichas justas para llenar filas enteras.</li>
+        <li><strong>Ajustes:</strong> puedes cambiar la dimensión del tablero, el tamaño y el aspecto de las fichas; cada cambio empieza una partida nueva.</li>
+      </ol>
+      <button class="boton boton--principal dialogo__cerrar" autofocus>Entendido</button>
+    </form>
+  </dialog>
+</body>
+</html>
