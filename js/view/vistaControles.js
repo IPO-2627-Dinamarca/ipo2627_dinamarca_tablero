@@ -43,8 +43,9 @@ export class VistaControles {
   }
 
   mostrarMarcador({ movimientos, filasCompletas, filas }) {
-    this.#movimientos.value = movimientos;
-    this.#filas.value = `${filasCompletas} / ${filas}`;
+    // Texto simple (no región viva): el cambio ya lo anuncia el mensaje de estado.
+    this.#movimientos.textContent = movimientos;
+    this.#filas.textContent = `${filasCompletas} / ${filas}`;
   }
 
   // El mensaje está en una región aria-live: los lectores de pantalla lo anuncian.
@@ -63,6 +64,8 @@ export class VistaControles {
     });
   }
 
+  // Todos los botones con data-accion de la página, también "Jugar otra vez" de la capa de
+  // victoria (que pinta VistaTablero): un único escuchador en document por delegación.
   alPulsarAccion(callback) {
     document.addEventListener("click", (e) => {
       const boton = e.target.closest("[data-accion]");

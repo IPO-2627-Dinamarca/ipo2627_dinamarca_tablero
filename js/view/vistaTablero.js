@@ -2,7 +2,7 @@
 // (arrastrar y soltar, clic, teclado) en avisos al controlador.
 // Los elementos se localizan por atributos data-* (data-vista, data-celda, data-ficha),
 // no por clases de estilo, para que cambiar el CSS no rompa el JS.
-// Los eventos se gestionan por delegación: un único gestor por tipo en el tablero.
+// Los eventos se gestionan por delegación en el tablero (no un escuchador por ficha).
 import { aplicarAspecto } from "./ficha.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -27,11 +27,12 @@ export class VistaTablero {
     this.#tablero.addEventListener("drop", (e) => this.#soltado(e));
     this.#tablero.addEventListener("dragend", () => this.#limpiarArrastre());
     this.#tablero.addEventListener("focusin", (e) => this.#recordarFoco(e));
+    this.#tablero.addEventListener("keydown", (e) => this.#navegar(e));
   }
 
   // estado: { n, tamano, fichas: [{ aspecto, descripcion }], filasCompletas: [bool],
-  //           seleccionada, pista: [a, b], movidas: [a, b], bloqueado }
-  pintar({ n, tamano, fichas, filasCompletas, seleccionada = null, pista = [], movidas = [], bloqueado = false }) {
+  //           seleccionada, pista: [a, b], bloqueado }
+  pintar({ n, tamano, fichas, filasCompletas, seleccionada = null, pista = [], bloqueado = false }) {
     const teniaFoco = this.#tablero.contains(document.activeElement);
     if (n !== this.#n) this.#foco = 0;
     this.#n = n;
@@ -45,6 +46,7 @@ export class VistaTablero {
       const elemento = document.createElement("div");
       elemento.className = "tablero__fila";
       elemento.setAttribute("role", "row");
+      elemento.setAttribute("aria-label", `Fila ${fila + 1}`);
 
       for (let columna = 0; columna < n; columna++) {
         const indice = fila * n + columna;
@@ -52,7 +54,6 @@ export class VistaTablero {
           this.#crearCelda(indice, fichas[indice], {
             seleccionada: indice === seleccionada,
             pista: pista.includes(indice),
-            movida: movidas.includes(indice),
             completa,
             bloqueado,
           }),
@@ -63,6 +64,9 @@ export class VistaTablero {
     });
 
     this.#tablero.replaceChildren(...filas);
+    // Partida terminada: el tablero queda tapado por la capa de victoria y fuera del
+    // tabulador y de los lectores de pantalla.
+    this.#tablero.inert = bloqueado;
     if (teniaFoco) this.#fichaEn(this.#foco)?.focus();
   }
 
@@ -97,28 +101,30 @@ export class VistaTablero {
     this.#alSoltar = callback;
   }
 
+  // Esc cancela la selección esté donde esté el foco (también en los botones del panel),
+  // salvo dentro de la ventana de ayuda: ahí Esc solo la cierra.
   alCancelar(callback) {
-    this.#tablero.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") callback();
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !e.target.closest?.("dialog")) callback();
     });
   }
 
-  // Flechas: mueven el foco entre fichas sin salir del tablero.
-  alNavegar() {
+  // Flechas: mueven el foco entre fichas sin salir del tablero. Es comportamiento
+  // propio de la vista (no cambia el modelo), así que no avisa al controlador.
+  #navegar(e) {
     const pasos = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
-    this.#tablero.addEventListener("keydown", (e) => {
-      const ficha = e.target.closest("[data-ficha]");
-      if (!ficha || !(e.key in pasos)) return;
-      e.preventDefault();
-      const [df, dc] = pasos[e.key];
-      const indice = Number(ficha.dataset.ficha);
-      const fila = Math.min(this.#n - 1, Math.max(0, Math.floor(indice / this.#n) + df));
-      const columna = Math.min(this.#n - 1, Math.max(0, (indice % this.#n) + dc));
-      this.#fichaEn(fila * this.#n + columna)?.focus();
-    });
+    const ficha = e.target.closest("[data-ficha]");
+    // Con Alt/Ctrl/Meta las flechas son atajos del navegador (p. ej. Alt+← = atrás).
+    if (!ficha || !(e.key in pasos) || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    const [df, dc] = pasos[e.key];
+    const indice = Number(ficha.dataset.ficha);
+    const fila = Math.min(this.#n - 1, Math.max(0, Math.floor(indice / this.#n) + df));
+    const columna = Math.min(this.#n - 1, Math.max(0, (indice % this.#n) + dc));
+    this.#fichaEn(fila * this.#n + columna)?.focus();
   }
 
-  #crearCelda(indice, { aspecto, descripcion }, { seleccionada, pista, movida, completa, bloqueado }) {
+  #crearCelda(indice, { aspecto, descripcion }, { seleccionada, pista, completa, bloqueado }) {
     const celda = document.createElement("div");
     celda.className = "celda";
     celda.classList.toggle("celda--seleccionada", seleccionada);
@@ -128,7 +134,7 @@ export class VistaTablero {
     celda.dataset.celda = indice;
 
     const ficha = document.createElement("div");
-    aplicarAspecto(ficha, aspecto, movida && "ficha--movida");
+    aplicarAspecto(ficha, aspecto);
     ficha.dataset.ficha = indice;
     ficha.draggable = !bloqueado;
     ficha.tabIndex = indice === this.#foco ? 0 : -1;
@@ -173,8 +179,9 @@ export class VistaTablero {
   }
 
   #sobrevolando(e) {
-    // Solo se aceptan fichas del propio tablero (no textos, archivos, etc.).
-    if (!e.dataTransfer.types.includes(FORMATO)) return;
+    // Solo se aceptan fichas de este tablero: el arrastre tiene que haber empezado aquí
+    // (#origen) y traer nuestro formato (no textos, archivos ni datos de otras páginas).
+    if (!this.#origen || !e.dataTransfer.types.includes(FORMATO)) return;
     const celda = e.target.closest("[data-celda]");
     if (!celda) return this.#resaltarDestino(null);
 
@@ -190,7 +197,9 @@ export class VistaTablero {
   #soltado(e) {
     e.preventDefault(); // evita que el navegador intente abrir o navegar a lo soltado
     const celda = e.target.closest("[data-celda]");
+    const desdeEsteTablero = this.#origen !== null;
     this.#limpiarArrastre();
+    if (!desdeEsteTablero) return;
 
     let datos;
     try {
@@ -220,7 +229,6 @@ export class VistaTablero {
 function crearMarcaFila(fila, completa) {
   const marca = document.createElement("div");
   marca.className = "tablero__marca";
-  marca.classList.toggle("tablero__marca--completa", completa);
   marca.setAttribute("role", "gridcell");
   marca.setAttribute("aria-label", `Fila ${fila + 1} ${completa ? "completa" : "incompleta"}`);
   marca.textContent = completa ? "✓" : "";
