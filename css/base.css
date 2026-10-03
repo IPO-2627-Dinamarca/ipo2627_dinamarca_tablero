@@ -1,71 +1,73 @@
-/* BASE: reinicio mínimo, estilos por defecto de la página y accesibilidad
-   (foco visible y enlace "Saltar al tablero").
-   :where() deja la especificidad a 0 para que cualquier componente la supere. */
-@layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
+/* BASE: reinicio mínimo, estilos por defecto de la página y accesibilidad. */
 
-  html {
-    -webkit-text-size-adjust: 100%;
-  }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--fondo);
-    color: var(--texto);
-    font-family: var(--fuente);
-    font-size: var(--texto-m);
-    font-weight: var(--peso-normal);
-    line-height: 1.5;
-  }
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: var(--texto-normal);
+  font-weight: var(--peso-normal);
+  line-height: var(--interlineado-texto);
+}
 
-  :where(h1, h2, p, ol, ul, dl, dd, fieldset) {
-    margin: 0;
-  }
+h1, h2, p, ol, dl, dd, fieldset {
+  margin: 0;
+}
 
-  :where(fieldset) {
-    padding: 0;
-    border: 0;
-    min-width: 0;
-  }
+fieldset {
+  min-width: 0; /* por defecto no encoge por debajo de su contenido */
+  padding: 0;
+  border: 0;
+}
 
-  :where(legend) {
-    padding: 0;
-  }
+legend {
+  padding: 0;
+}
 
-  :where(button, select, input) {
-    font: inherit;
-    color: inherit;
-  }
+button, select, input {
+  font: inherit;
+  color: inherit;
+}
 
-  :focus-visible {
-    outline: 3px solid var(--acento);
-    outline-offset: 2px;
-  }
+:focus-visible {
+  outline: var(--anillo) solid var(--acento);
+  outline-offset: 2px;
+}
 
-  [hidden] {
-    display: none !important;
-  }
+/* !important justificado: hidden tiene que ganar también a los componentes que fijan
+   display (p. ej. .victoria usa flex). */
+[hidden] {
+  display: none !important;
+}
 
-  /* Enlace de salto: fuera de la vista hasta que recibe el foco (posicionamiento
-     absoluto para no ocupar espacio en el flujo). */
-  .salto {
-    position: absolute;
-    left: var(--espacio-4);
-    top: -4rem;
-    z-index: 10;
-    padding: var(--espacio-2) var(--espacio-4);
-    background: var(--superficie);
-    color: var(--texto);
-    border: 1px solid var(--acento);
-    border-radius: var(--radio);
-  }
+input[type="radio"] {
+  width: 1.1em; /* crece con el tamaño de letra */
+  height: 1.1em;
+  accent-color: var(--acento); /* el color del sistema rompería la monocromía */
+}
 
-  .salto:focus {
-    top: var(--espacio-4);
-  }
+/* Enlace "Saltar al tablero": posicionado arriba, visible solo cuando recibe el foco. */
+.salto {
+  position: absolute;
+  top: var(--espacio-3);
+  left: var(--espacio-3);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--acento);
+}
+
+/* Contenido solo para lectores de pantalla (y el enlace de salto sin foco). */
+.solo-lector,
+.salto:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
