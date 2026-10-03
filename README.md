@@ -67,8 +67,8 @@ Hecha solo con HTML, CSS y JavaScript del navegador: sin bibliotecas, sin framew
 ```
 index.html                estructura semántica de la página
 css/
-  tokens.css              variables de diseño: colores, fuentes, espacios (y las tres estrategias)
-  base.css                reinicio y accesibilidad
+  tokens.css              variables de diseño, en tres bloques: cromático, tipográfico y espacial
+  base.css                reinicio mínimo y accesibilidad (foco visible, enlace de salto)
   layout.css              reparto de la página con Grid
   components.css          aspecto de cada componente (panel, tablero, celdas, fichas...)
 js/
@@ -90,35 +90,37 @@ js/
 ## Mecánica del juego
 
 - **Comienzo**: el tablero siempre tiene solución. De cada tipo se ponen fichas justas para llenar filas enteras (un múltiplo de N) y las N filas se reparten entre los 3 tipos lo más equilibradamente posible. Después se barajan (Fisher-Yates) hasta que ninguna fila empiece ya completa.
-- **Movimiento**: se intercambian dos fichas cualesquiera del tablero.
+- **Movimiento**: se intercambian dos fichas cualesquiera del tablero, estén donde estén. Si son del mismo tipo el intercambio no cambiaría nada, así que no se hace (ni cuenta como movimiento) y se avisa.
 - **Fin**: cuando todas las filas tienen fichas de un único tipo aparece la capa de victoria con el número de movimientos.
 - **Pista**: se calcula qué tipo debería acabar en cada fila (el reparto que deja más fichas ya en su sitio, por programación dinámica) y se propone un intercambio que coloque dos fichas a la vez o, si no lo hay, al menos una. Nunca mueve una ficha que ya está en su sitio, así que seguir las pistas siempre lleva a la solución.
-- **Ajustes**: dimensión de 3×3 a 9×9, fichas pequeñas, medianas o grandes, y forma y color de cada tipo a elegir entre 6 formas y 6 colores. Si se elige una forma o un color que ya usa otro tipo, los dos se lo intercambian, así los tipos siempre se distinguen. Cualquier cambio empieza una partida nueva.
+- **Ajustes**: dimensión de 3×3 a 9×9 (el enunciado pide N ≥ 3; el tope de 9 mantiene las fichas a un tamaño que se puede pulsar), fichas pequeñas, medianas o grandes, y forma y color de cada tipo a elegir entre 6 formas y 6 colores. Si se elige una forma o un color que ya usa otro tipo, los dos se lo intercambian, así los tipos siempre se distinguen. Cualquier cambio empieza una partida nueva. La configuración se recuerda entre visitas (`localStorage`) y lo leído se valida contra listas cerradas, así que datos manipulados vuelven a los valores por defecto.
 
 ## Composición y posicionamiento
 
-- **Grid** para lo bidimensional: la página (áreas con nombre), el tablero (`repeat(var(--n), ...)` con N que llega desde JS) y las filas de aspecto del panel.
-- **Flexbox** para lo unidimensional: el panel, los botones, los campos, el marcador y los botones de tamaño.
-- **`position`** solo para la asistencia al usuario, que se superpone sin mover nada: la marca de pista/destino en la esquina de la celda (`::after` sobre la celda `relative`), el mensaje emergente del botón *Pista*, la capa de victoria sobre el tablero, el enlace "Saltar al tablero" y el radio nativo que cubre cada opción de tamaño.
-- El tablero es un contenedor de consulta (`container-type`): el lado de la celda es el del tamaño elegido, salvo que no quepa, y entonces se ajusta al ancho disponible (`cqi`).
+- **Grid** para lo bidimensional: la página (áreas con nombre: juego a la izquierda y panel a la derecha, y en pantallas estrechas una columna; en los dos casos en el orden del HTML, que es el del tabulador), el tablero (`repeat(var(--n), ...)` con N que llega desde JS) y las filas de aspecto del panel, cuyas columnas quedan alineadas entre filas.
+- **Flexbox** para lo unidimensional: la cabecera, el panel y sus grupos de controles, las opciones de tamaño, el marcador, la capa de victoria y la ventana de ayuda.
+- **`position`** solo para la asistencia al usuario, que se superpone sin mover nada: la marca `?`/`⇄` en la esquina de la celda (`::after` sobre la celda `relative`), la capa de victoria sobre el tablero (absoluta dentro del marco `relative`) y el enlace "Saltar al tablero".
+- El área de juego es un contenedor de consulta (`container-type`): el lado de la celda es el del tamaño elegido, salvo que no quepa, y entonces se ajusta al ancho disponible (`cqi`). Así un 9×9 grande también cabe en el móvil. El panel también es contenedor de consulta: si es muy estrecho (320 px), la forma y el color de cada ficha se apilan para que no se recorten.
 
 ## Estilística
 
-- **Cromática**: interfaz **monocromática** (un único tono azul pizarra del que salen fondos, textos, bordes y acento variando solo saturación y luminosidad), para que no compita con las fichas. Las fichas usan seis tonos repartidos cada 60° del círculo cromático a partir de un tono base; por defecto una **tríada** (rojo, verde y azul). El tablero es oscuro en ambos modos para que las fichas destaquen. Modo claro/oscuro con `light-dark()` y contrastes WCAG AA.
-- **Tipográfica · una única fuente con niveles de realce**: la fuente del sistema, con jerarquía por tamaño (escala de razón 1,25), grosor (400 / 600 / 800) y versalitas espaciadas en las etiquetas. Cifras tabulares en el marcador.
-- **Espacial**: unidades `rem` con una escala de espaciado, tamaños de celda en `rem` limitados por `cqi`. Gestalt: *proximidad* (celdas de una fila juntas, grupos de ajustes separados), *similitud* (mismo tipo = misma forma y color), *cierre* (marco del tablero), *figura/fondo* (fichas vivas sobre tablero oscuro) y *región común* (paneles).
+Las tres estrategias están separadas en tres bloques de `css/tokens.css`. Colores, fuentes, tamaños, pesos, interlineados y la escala de espacios salen de esas variables; solo quedan como valores propios algunas medidas de un único componente (por ejemplo, el tamaño mínimo del marco o de la marca de la celda).
+
+- **Cromática**: interfaz **monocromática** en HSL (un único tono azul pizarra, `--matiz-interfaz`, del que salen fondos, textos, bordes y acento variando solo saturación y luminosidad), para que no compita con las fichas. Las fichas usan seis tonos repartidos cada 60° del círculo cromático a partir de `--matiz-fichas`; por defecto una **tríada** (rojo, verde y azul), todas con la misma saturación y luz (`--saturacion-fichas`, `--luz-fichas`) y con contraste de al menos 3:1 sobre su celda. El tablero es oscuro en ambos modos para que las fichas destaquen, y las ayudas sobre él son un azul muy claro. Modo claro/oscuro con `light-dark()`; textos con contraste AA y bordes de los controles a 3:1. Los radios usan `accent-color` para no salirse de la paleta.
+- **Tipográfica · una única fuente con niveles de realce**: la fuente del sistema, con jerarquía por tamaño (cuatro valores de una escala de razón 1,25: 0,8 / 1 / 1,563 / 2,441 rem), grosor (400 / 600 / 800) y mayúsculas espaciadas en las etiquetas pequeñas. Cifras tabulares en el marcador.
+- **Espacial**: unidades `rem` con una escala doble de espaciado (0,25 → 0,5 → 1 → 2), tres tamaños de celda en `rem` limitados por `cqi` y `ch` para el ancho de lectura de los mensajes. Gestalt: *proximidad* (las filas del tablero más separadas que las columnas, porque el juego va por filas; grupos de ajustes separados), *similitud* (mismo tipo = misma forma y color), *figura/fondo* (fichas claras sobre tablero oscuro) y *región común* (el marco del tablero y los paneles).
 
 ## Interacción y usabilidad
 
-- **Drag & Drop**: se arrastra una ficha sobre otra. El origen viaja en `dataTransfer` (`application/json`); solo se aceptan fichas del propio tablero. Mientras se arrastra, la celda de origen queda marcada y la de destino se resalta con ⇄.
+- **Drag & Drop**: se arrastra una ficha sobre otra. El origen viaja en `dataTransfer` (`application/json`); solo se aceptan fichas del propio tablero. Mientras se arrastra, la celda de origen queda con borde discontinuo y la ficha atenuada, y la de destino se resalta con ⇄.
 - **Alternativa sin arrastrar**: clic en una ficha y después en otra (útil en móvil y con ratón de precisión baja).
-- **Teclado**: flechas para moverse por el tablero, Intro o Espacio para seleccionar y Esc para cancelar. Solo una ficha está en el orden de tabulación (*roving tabindex*).
-- **Ayudas**: ✓ al final de cada fila completa, fondo distinto en sus celdas, contador de movimientos y de filas completas, mensajes que explican cada acción, botón *Pista* y ventana *Cómo se juega* (`<dialog>` nativo).
-- **Accesibilidad**: `role="grid"`/`row`/`gridcell`, cada ficha con `aria-label` («triángulo azul, fila 2, columna 3») y `aria-pressed`, mensajes en una región `aria-live`, foco visible, enlace "Saltar al tablero", los tipos se distinguen por forma además de por color y se respeta `prefers-reduced-motion`.
+- **Teclado**: flechas para moverse por el tablero (con Alt, Ctrl o Meta se dejan al navegador), Intro o Espacio para seleccionar y Esc para cancelar, esté donde esté el foco (menos en la ventana de ayuda, donde Esc solo la cierra). Solo una ficha está en el orden de tabulación (*roving tabindex*).
+- **Ayudas**: ✓ al final de cada fila completa, fondo distinto en sus celdas, contador de movimientos y de filas completas, mensajes que explican cada acción, botón *Pista* (con una nota que explica qué hace) y ventana *Cómo se juega* (`<dialog>` nativo). Si se selecciona una de las dos fichas de la pista, la pista sigue marcada y el mensaje recuerda cuál es la otra. La ficha seleccionada lleva el anillo por dentro y el foco y la pista por fuera, para no confundirlos (si es de la pista, lleva los dos). La marca `?`/`⇄` se escala con la celda para no tapar fichas en tableros pequeños.
+- **Accesibilidad**: `role="grid"`/`row`/`gridcell`, cada ficha con `aria-label` («triángulo azul, fila 2, columna 3») y `aria-pressed`, mensajes en una región `aria-live`, foco visible, enlace "Saltar al tablero" y los tipos se distinguen por forma además de por color. En modo de colores forzados (alto contraste) el tablero conserva los colores de las fichas. Al ganar, el tablero queda `inert` bajo la capa de victoria (fuera del tabulador). No hay animaciones. Las fichas son `div` con `role="button"` porque tienen que ser `draggable` y estar dentro de la rejilla (`gridcell`).
 
 ## Buenas prácticas
 
-- **HTML semántico**: `header`, `aside`, `main` y `footer`; un único `h1`; ajustes en un `form` con `fieldset`/`legend` y `label`; marcador como lista de definiciones (`dl`) con `output`; ayuda en `dialog`.
-- **CSS moderno**: capas `@layer` para controlar la cascada, `:where()` para no subir la especificidad, nombres de clase BEM, anidamiento nativo, `:has()`, `color-mix()` y consultas de contenedor.
-- **JS ↔ DOM**: las vistas localizan los elementos por `data-vista`, `data-control`, `data-accion`, `data-celda` y `data-ficha`, no por clases de estilo, y los eventos se atienden por delegación (un solo escuchador por tipo).
+- **HTML semántico**: `header`, `main` (con un `h2` solo para lectores de pantalla), `aside` para el panel de partida y ajustes, que acompaña al juego, y `footer`; un único `h1`; ajustes en un `form` con `fieldset`/`legend` y `label`; marcador como lista de definiciones (`dl`); ayuda en `dialog`.
+- **CSS mantenible**: un archivo por responsabilidad, cargados en orden (tokens → base → layout → componentes); los componentes se seleccionan por clase con nombres BEM (`bloque__elemento--modificador`), sin ids ni anidamientos, así la especificidad es baja y pareja. El único `!important` es el de `[hidden]`, comentado. Entre los recursos modernos destacan `:has()`, para dibujar el foco en la celda, y la consulta de contenedor del tablero.
+- **JS ↔ DOM**: las vistas localizan los elementos por `data-vista`, `data-control`, `data-accion`, `data-celda` y `data-ficha`, no por clases de estilo, y los eventos se atienden por delegación en el tablero y en el documento (no hay un escuchador por ficha).
 - **JS ↔ CSSOM**: el JS no escribe estilos sueltos. Solo fija la variable `--n` y elige clases modificadoras (tamaño, forma, color, estado); el CSS decide cómo se ve.
