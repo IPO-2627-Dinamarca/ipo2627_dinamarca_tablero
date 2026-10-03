@@ -26,7 +26,6 @@ export class Controlador {
     this.#tablero.alSeleccionar((indice) => this.#seleccionar(indice));
     this.#tablero.alIntercambiar((origen, destino) => this.#intercambiar(origen, destino));
     this.#tablero.alCancelar(() => this.#cancelarSeleccion());
-    this.#tablero.alNavegar();
     this.#controles.alCambiarAjuste((cambio) => this.#cambiarAjuste(cambio));
     this.#controles.alPulsarAccion((accion) => this.#ejecutar(accion));
 
@@ -89,8 +88,12 @@ export class Controlador {
 
     if (this.#seleccionada === null) {
       this.#seleccionada = indice;
+      // Si la ficha es una de las dos de la pista, la pista sigue visible y se recuerda la otra.
+      const otra = this.#pista.includes(indice) ? this.#pista.find((i) => i !== indice) : null;
+      if (otra === null) this.#pista = [];
       this.#pintar();
-      this.#controles.anunciar(`Seleccionada: ${this.#describir(indice)}. Elige otra ficha para intercambiarlas.`);
+      const siguiente = otra === null ? "Elige otra ficha" : `Según la pista, elige ${this.#describir(otra)}`;
+      this.#controles.anunciar(`Seleccionada: ${this.#describir(indice)}. ${siguiente} para intercambiarlas.`);
     } else if (this.#seleccionada === indice) {
       this.#cancelarSeleccion();
     } else {
@@ -106,13 +109,24 @@ export class Controlador {
   }
 
   #intercambiar(origen, destino) {
+    if (this.#partida.terminada) return;
+    if (origen === destino || this.#partida.mismoTipo(origen, destino)) {
+      this.#seleccionada = null;
+      this.#pintar();
+      this.#controles.anunciar(
+        origen === destino
+          ? "La ficha se ha soltado en su sitio: arrástrala sobre otra para intercambiarlas."
+          : "Las dos fichas son del mismo tipo: intercambiarlas no cambia nada. Elige fichas distintas.",
+      );
+      return;
+    }
     const antes = this.#partida.filasCompletas();
     const descripcion = `${this.#describir(origen)} por ${this.#describir(destino)}`;
     if (!this.#partida.intercambiar(origen, destino)) return;
 
     this.#seleccionada = null;
     this.#pista = [];
-    this.#pintar([origen, destino]);
+    this.#pintar();
 
     if (this.#partida.terminada) {
       const movimientos = this.#partida.movimientos;
@@ -131,7 +145,10 @@ export class Controlador {
 
   #mostrarPista() {
     const pista = this.#partida.pista();
-    if (!pista) return;
+    if (!pista) {
+      this.#controles.anunciar("La partida ya está terminada: pulsa «Nueva partida» para jugar otra.");
+      return;
+    }
     this.#pista = pista;
     this.#seleccionada = null;
     this.#pintar();
@@ -139,7 +156,7 @@ export class Controlador {
     this.#controles.anunciar(`Pista: intercambia ${this.#describir(a)} por ${this.#describir(b)}.`);
   }
 
-  #pintar(movidas = []) {
+  #pintar() {
     const aspecto = this.#configuracion.aspecto;
     const descripciones = aspecto.map((_, tipo) => this.#configuracion.describir(tipo));
     const filasCompletas = this.#partida.filasCompletas();
@@ -151,7 +168,6 @@ export class Controlador {
       filasCompletas,
       seleccionada: this.#seleccionada,
       pista: this.#pista,
-      movidas,
       bloqueado: this.#partida.terminada,
     });
     this.#controles.mostrarMarcador({
