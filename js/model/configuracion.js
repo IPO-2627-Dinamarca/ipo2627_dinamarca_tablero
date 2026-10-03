@@ -9,7 +9,7 @@ const CLAVE = "tablero:configuracion";
 export const DIMENSION_MIN = 3;
 export const DIMENSION_MAX = 9;
 
-export const TAMANOS = {
+const TAMANOS = {
   pequena: "Pequeña",
   mediana: "Mediana",
   grande: "Grande",
@@ -65,39 +65,44 @@ export class Configuracion {
   }
 
   set dimension(valor) {
-    const n = Math.round(Number(valor));
-    if (!Number.isFinite(n)) return;
-    this.#datos.dimension = Math.min(DIMENSION_MAX, Math.max(DIMENSION_MIN, n));
+    const n = normalizarDimension(valor);
+    if (n === null) return;
+    this.#datos.dimension = n;
     this.#guardar();
   }
 
   set tamano(valor) {
-    if (!Object.hasOwn(TAMANOS, valor)) return;
+    if (!esClave(TAMANOS, valor)) return;
     this.#datos.tamano = valor;
     this.#guardar();
   }
 
   cambiarForma(tipo, forma) {
-    if (Object.hasOwn(FORMAS, forma)) this.#cambiarRasgo(tipo, "forma", forma);
+    if (esClave(FORMAS, forma)) this.#cambiarRasgo(tipo, "forma", forma);
   }
 
   cambiarColor(tipo, color) {
-    if (Object.hasOwn(COLORES, color)) this.#cambiarRasgo(tipo, "color", color);
+    if (esClave(COLORES, color)) this.#cambiarRasgo(tipo, "color", color);
   }
 
   // Texto legible para el usuario, p. ej. "triángulo azul".
   describir(tipo) {
+    if (!this.#esTipo(tipo)) return "ficha";
     const { forma, color } = this.#datos.aspecto[tipo];
     return `${FORMAS[forma]} ${COLORES[color]}`.toLowerCase();
   }
 
   #cambiarRasgo(tipo, rasgo, valor) {
+    if (!this.#esTipo(tipo)) return;
     const aspecto = this.#datos.aspecto;
-    if (!aspecto[tipo]) return;
     const otro = aspecto.find((ficha) => ficha[rasgo] === valor);
     if (otro) otro[rasgo] = aspecto[tipo][rasgo];
     aspecto[tipo][rasgo] = valor;
     this.#guardar();
+  }
+
+  #esTipo(tipo) {
+    return Number.isInteger(tipo) && tipo >= 0 && tipo < TIPOS;
   }
 
   #leer() {
@@ -119,17 +124,35 @@ export class Configuracion {
 
 // Descarta lo guardado que no sea válido (versiones antiguas, datos manipulados...).
 function validar(guardado) {
-  const dimension = Number.isInteger(guardado.dimension) ? guardado.dimension : POR_DEFECTO.dimension;
+  if (typeof guardado !== "object" || guardado === null) guardado = {};
   const aspecto = Array.isArray(guardado.aspecto) ? guardado.aspecto : [];
   const aspectoValido =
     aspecto.length === TIPOS &&
-    aspecto.every((ficha) => Object.hasOwn(FORMAS, ficha?.forma) && Object.hasOwn(COLORES, ficha?.color)) &&
+    aspecto.every(
+      (ficha) =>
+        esClave(FORMAS, ficha?.forma) && esClave(COLORES, ficha?.color),
+    ) &&
     new Set(aspecto.map((ficha) => ficha.forma)).size === TIPOS &&
     new Set(aspecto.map((ficha) => ficha.color)).size === TIPOS;
 
   return {
-    dimension: Math.min(DIMENSION_MAX, Math.max(DIMENSION_MIN, dimension)),
-    tamano: Object.hasOwn(TAMANOS, guardado.tamano) ? guardado.tamano : POR_DEFECTO.tamano,
+    dimension: normalizarDimension(guardado.dimension) ?? POR_DEFECTO.dimension,
+    tamano: esClave(TAMANOS, guardado.tamano) ? guardado.tamano : POR_DEFECTO.tamano,
     aspecto: (aspectoValido ? aspecto : POR_DEFECTO.aspecto).map(({ forma, color }) => ({ forma, color })),
   };
+}
+
+// Número entero dentro de [DIMENSION_MIN, DIMENSION_MAX], o null si no es un número.
+// La usan tanto el selector como la lectura de localStorage, así aceptan lo mismo.
+function normalizarDimension(valor) {
+  if (typeof valor !== "number" && typeof valor !== "string") return null;
+  const n = Math.round(Number(valor));
+  if (!Number.isFinite(n) || String(valor).trim() === "") return null;
+  return Math.min(DIMENSION_MAX, Math.max(DIMENSION_MIN, n));
+}
+
+// ¿Es valor una de las claves de la tabla? Solo cadenas: Object.hasOwn convertiría
+// ["circulo"] en "circulo". La usan los setters y la lectura, así aceptan lo mismo.
+function esClave(tabla, valor) {
+  return typeof valor === "string" && Object.hasOwn(tabla, valor);
 }

@@ -9,6 +9,8 @@ export class Partida {
   #movimientos = 0;
 
   constructor(n) {
+    // Hace falta al menos una fila por tipo (con menos, el tablero no se puede generar).
+    if (!Number.isInteger(n) || n < TIPOS) throw new RangeError(`Dimensión no válida: ${n}`);
     this.#n = n;
     this.#celdas = generarTablero(n);
   }
@@ -37,9 +39,14 @@ export class Partida {
     return { fila: Math.floor(indice / this.#n), columna: indice % this.#n };
   }
 
-  // Intercambia las fichas de dos celdas. Devuelve false si el movimiento no es válido.
+  mismoTipo(a, b) {
+    return this.#esCelda(a) && this.#esCelda(b) && this.#celdas[a] === this.#celdas[b];
+  }
+
+  // Intercambia las fichas de dos celdas. Devuelve false si el movimiento no es válido
+  // (misma celda, fuera del tablero, partida terminada o dos fichas del mismo tipo).
   intercambiar(a, b) {
-    if (a === b || this.terminada || !this.#esCelda(a) || !this.#esCelda(b)) return false;
+    if (a === b || this.terminada || !this.#esCelda(a) || !this.#esCelda(b) || this.mismoTipo(a, b)) return false;
     [this.#celdas[a], this.#celdas[b]] = [this.#celdas[b], this.#celdas[a]];
     this.#movimientos++;
     return true;
@@ -58,9 +65,7 @@ export class Partida {
     if (this.terminada) return null;
 
     const objetivo = this.#objetivoPorFila();
-    const fueraDeSitio = this.#celdas
-      .map((tipo, indice) => indice)
-      .filter((indice) => this.#celdas[indice] !== objetivo[this.posicion(indice).fila]);
+    const fueraDeSitio = [...this.#celdas.keys()].filter((indice) => this.#celdas[indice] !== objetivo[this.posicion(indice).fila]);
 
     let sencilla = null;
     for (const a of fueraDeSitio) {
@@ -81,7 +86,7 @@ export class Partida {
     const n = this.#n;
     const filas = filasDe(this.#celdas, n);
     const aciertos = filas.map((fila) => contarTipos(fila));
-    const restantes = contarTipos(this.#celdas).map((cantidad) => cantidad / n);
+    const filasPorTipo = contarTipos(this.#celdas).map((cantidad) => cantidad / n);
     const memoria = new Map();
 
     const mejor = (fila, cupos) => {
@@ -101,7 +106,7 @@ export class Partida {
       return resultado;
     };
 
-    return mejor(0, restantes).reparto;
+    return mejor(0, filasPorTipo).reparto;
   }
 
   #esCelda(indice) {
