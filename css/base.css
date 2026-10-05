@@ -1,4 +1,4 @@
-/* BASE: reinicio mínimo, estilos por defecto de la página y accesibilidad. */
+/* reset y estilos base */
 
 *, *::before, *::after {
   box-sizing: border-box;

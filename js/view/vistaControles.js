@@ -1,6 +1,4 @@
-// VISTA de los controles: panel de ajustes (dimensión, tamaño y aspecto de las fichas),
-// botones de acción, marcador, mensajes de estado y ventana de ayuda.
-// Los controles se localizan por atributos data-control / data-accion / data-vista.
+// controles del panel: ajustes, botones, marcador y mensajes
 import { aplicarAspecto } from "./ficha.js";
 
 const $ = (selector) => document.querySelector(selector);

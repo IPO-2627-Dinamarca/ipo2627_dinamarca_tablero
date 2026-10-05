@@ -1,7 +1,5 @@
-/* LAYOUT: reparto de la página. Composición bidimensional con Grid y áreas con nombre.
-   Escritorio: juego a la izquierda y panel a la derecha. Pantallas estrechas (< 56rem):
-   una columna con el juego y después el panel. En los dos casos el orden visual es el del
-   HTML, así el tabulador recorre la página en el mismo orden en que se ve. */
+/* layout de la página con grid-template-areas
+   en móvil (<56rem) se apila en columna; el orden HTML = orden visual = orden del tabulador */
 
 .app {
   display: grid;

@@ -1,10 +1,3 @@
-/* COMPONENTES: un bloque por componente, con nombres BEM (bloque__elemento--modificador).
-   Flexbox para lo que va en una dirección (panel, campos, marcador) y Grid para
-   lo bidimensional (tablero, filas de aspecto).
-   position solo para la asistencia al usuario, que se superpone sin mover el resto:
-   marcas de la celda y capa de victoria (y en base.css el enlace de salto y el texto
-   solo para lectores de pantalla). */
-
 /* ---------- Cabecera ---------- */
 .cabecera__titulo {
   font-size: var(--texto-titulo);
@@ -35,7 +28,7 @@
   color: var(--texto-suave);
 }
 
-/* Grupos que se apilan en vertical (composición unidimensional). */
+/* elementos apilados en columna */
 .acciones,
 .campo,
 .grupo,
@@ -100,7 +93,6 @@
   cursor: pointer;
 }
 
-/* Cada fila: muestra + forma + color, con las columnas alineadas entre filas. */
 .aspecto__ficha {
   display: grid;
   grid-template-columns: var(--celda-pequena) minmax(0, 1fr) minmax(0, 1fr);
@@ -137,8 +129,7 @@
 }
 
 /* ---------- Tablero ---------- */
-/* El marco es la referencia (relative) de la capa de victoria; su tamaño mínimo
-   deja sitio a esa capa aunque el tablero sea pequeño. */
+/* relative para que la capa de victoria se posicione sobre él; el min-width le da sitio */
 .marco {
   position: relative;
   display: grid;
@@ -224,8 +215,9 @@
   box-shadow: inset 0 0 0 var(--anillo) var(--ayuda);
 }
 
-/* Seleccionada y de la pista a la vez: los dos anillos. */
-.celda--seleccionada.celda--pista {
+/* Seleccionada + pista o seleccionada + destino: anillo interior y exterior a la vez. */
+.celda--seleccionada.celda--pista,
+.celda--seleccionada.celda--destino {
   box-shadow: inset 0 0 0 var(--anillo) var(--ayuda), 0 0 0 var(--anillo) var(--ayuda);
 }
 
@@ -271,6 +263,8 @@
   aspect-ratio: 1;
   background: var(--color-ficha);
   cursor: grab;
+  user-select: none;
+  touch-action: none;
 }
 
 .ficha:focus-visible { outline: none; } /* lo dibuja la celda */
@@ -300,6 +294,7 @@
 .victoria {
   position: absolute;
   inset: 0;
+  z-index: 2; /* por encima de las celdas con z-index: 1 (pista/destino/foco) */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -337,6 +332,8 @@
 /* ---------- Ventana de ayuda (dialog nativo) ---------- */
 .dialogo {
   max-width: min(34rem, 100% - var(--espacio-4));
+  max-height: calc(100dvh - var(--espacio-4));
+  overflow-y: auto;
   padding: var(--espacio-4);
   background: var(--superficie);
   color: var(--texto);

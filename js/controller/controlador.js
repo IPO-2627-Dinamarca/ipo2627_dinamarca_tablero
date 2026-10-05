@@ -1,6 +1,5 @@
-// CONTROLADOR: recibe lo que hace el usuario en las vistas, lo traduce en operaciones
-// sobre el modelo (partida y configuración) y decide qué deben mostrar las vistas.
-// También guarda el estado de la interacción: ficha seleccionada y pista visible.
+// controlador: conecta vistas y modelo
+// aquí se guarda también el estado de la interacción (selección actual, pista activa)
 import { Partida } from "../model/partida.js";
 import { COLORES, DIMENSION_MAX, DIMENSION_MIN, FORMAS } from "../model/configuracion.js";
 
@@ -104,6 +103,7 @@ export class Controlador {
   #cancelarSeleccion() {
     if (this.#seleccionada === null) return;
     this.#seleccionada = null;
+    this.#pista = [];
     this.#pintar();
     this.#controles.anunciar("Selección cancelada.");
   }
@@ -112,6 +112,7 @@ export class Controlador {
     if (this.#partida.terminada) return;
     if (origen === destino || this.#partida.mismoTipo(origen, destino)) {
       this.#seleccionada = null;
+      this.#pista = [];
       this.#pintar();
       this.#controles.anunciar(
         origen === destino

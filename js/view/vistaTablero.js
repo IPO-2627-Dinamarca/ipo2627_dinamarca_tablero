@@ -1,8 +1,5 @@
-// VISTA del tablero: pinta la rejilla N×N y traduce lo que hace el usuario sobre ella
-// (arrastrar y soltar, clic, teclado) en avisos al controlador.
-// Los elementos se localizan por atributos data-* (data-vista, data-celda, data-ficha),
-// no por clases de estilo, para que cambiar el CSS no rompa el JS.
-// Los eventos se gestionan por delegación en el tablero (no un escuchador por ficha).
+// Vista del tablero. Usa data-* para localizar elementos (no clases) para que
+// refactorizar CSS no rompa el JS.
 import { aplicarAspecto } from "./ficha.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -30,14 +27,12 @@ export class VistaTablero {
     this.#tablero.addEventListener("keydown", (e) => this.#navegar(e));
   }
 
-  // estado: { n, tamano, fichas: [{ aspecto, descripcion }], filasCompletas: [bool],
-  //           seleccionada, pista: [a, b], bloqueado }
+  // { n, tamano, fichas, filasCompletas, seleccionada?, pista?, bloqueado? }
   pintar({ n, tamano, fichas, filasCompletas, seleccionada = null, pista = [], bloqueado = false }) {
     const teniaFoco = this.#tablero.contains(document.activeElement);
     if (n !== this.#n) this.#foco = 0;
     this.#n = n;
 
-    // Único estilo en línea: el número de columnas de la rejilla depende de N.
     this.#tablero.style.setProperty("--n", n);
     this.#tablero.className = `tablero tablero--${tamano}`;
     this.#tablero.setAttribute("aria-label", `Tablero de ${n} por ${n}`);
@@ -64,8 +59,7 @@ export class VistaTablero {
     });
 
     this.#tablero.replaceChildren(...filas);
-    // Partida terminada: el tablero queda tapado por la capa de victoria y fuera del
-    // tabulador y de los lectores de pantalla.
+    // cuando ganas, el tablero queda inert bajo la capa de victoria
     this.#tablero.inert = bloqueado;
     if (teniaFoco) this.#fichaEn(this.#foco)?.focus();
   }
@@ -109,8 +103,7 @@ export class VistaTablero {
     });
   }
 
-  // Flechas: mueven el foco entre fichas sin salir del tablero. Es comportamiento
-  // propio de la vista (no cambia el modelo), así que no avisa al controlador.
+  // flechas para mover el foco entre fichas, sin afectar al modelo
   #navegar(e) {
     const pasos = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
     const ficha = e.target.closest("[data-ficha]");
@@ -171,11 +164,13 @@ export class VistaTablero {
 
     // El navegador captura la imagen de arrastre al acabar este gestor: las clases se
     // añaden en el siguiente fotograma para que la imagen muestre la ficha normal.
-    requestAnimationFrame(() => {
+    // el navegador toma la imagen de arrastre antes del siguiente fotograma:
+    // esperamos un tick para que no capture la ficha ya atenuada
+    setTimeout(() => {
       if (this.#origen !== ficha) return;
       ficha.classList.add("ficha--arrastrada");
       ficha.parentElement.classList.add("celda--origen");
-    });
+    }, 0);
   }
 
   #sobrevolando(e) {

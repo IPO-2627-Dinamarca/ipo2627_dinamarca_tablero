@@ -1,10 +1,6 @@
-/* TOKENS: variables de diseño. Cada bloque responde a una de las tres estrategias. */
-
 :root {
-  /* ===== DISEÑO CROMÁTICO =====
-     Interfaz MONOCROMÁTICA: un único tono (azul pizarra) del que salen fondos, textos,
-     bordes y acento variando solo saturación y luminosidad. Así no compite con las fichas.
-     Modo claro/oscuro con light-dark(claro, oscuro) según la preferencia del sistema. */
+  /* colores — interfaz monocromática (azul pizarra, distinta saturación/luz)
+     para no competir con las fichas; claro/oscuro automático con light-dark() */
   color-scheme: light dark;
   --matiz-interfaz: 225;
 
@@ -24,10 +20,8 @@
   --ayuda-texto: hsl(var(--matiz-interfaz) 40% 12%);
   --velo: hsl(var(--matiz-interfaz) 25% 8% / 0.85); /* capa de victoria */
 
-  /* Fichas: seis tonos cada 60° del círculo cromático a partir de --matiz-fichas, con la
-     misma saturación y luz (todas llegan a 3:1 sobre su celda, también en filas completas).
-     Por defecto se usa una TRÍADA (tonos 1, 3 y 5: 120° entre sí). Con --matiz-fichas: 355
-     los tonos son rojo, ámbar, verde, turquesa, azul y violeta (los nombres del selector). */
+  /* fichas: 6 tonos separados 60° — cambiar --matiz-fichas rota toda la rueda
+     por defecto tríada: tonos 1, 3 y 5 (rojo, verde, azul) */
   --matiz-fichas: 355;
   --saturacion-fichas: 75%;
   --luz-fichas: 72%;
@@ -38,9 +32,7 @@
   --ficha-tono-5: hsl(calc(var(--matiz-fichas) + 240) var(--saturacion-fichas) var(--luz-fichas));
   --ficha-tono-6: hsl(calc(var(--matiz-fichas) + 300) var(--saturacion-fichas) var(--luz-fichas));
 
-  /* ===== DISEÑO TIPOGRÁFICO =====
-     Una única fuente (la del sistema) con niveles de realce: tamaño (escala de razón 1,25),
-     grosor (400 / 600 / 800) y mayúsculas espaciadas en las etiquetas pequeñas. */
+  /* tipografía — fuente del sistema, tamaños en escala modular (~×1.25) */
   --fuente: system-ui, sans-serif;
 
   --texto-pequeno: 0.8rem;
@@ -56,8 +48,7 @@
   --interlineado-titulo: 1.1;
   --espaciado-mayusculas: 0.1em;
 
-  /* ===== DISEÑO ESPACIAL =====
-     Unidades rem (respetan el tamaño de letra del usuario) con una escala doble. */
+  /* espaciado — escala en rem para respetar el tamaño de letra del usuario */
   --espacio-1: 0.25rem;
   --espacio-2: 0.5rem;
   --espacio-3: 1rem;

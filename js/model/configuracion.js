@@ -1,7 +1,4 @@
-// MODELO: características del tablero y de las fichas (dimensión N, tamaño y aspecto
-// de cada uno de los 3 tipos). Se guardan en localStorage para recordarlas entre visitas.
-// Los tres tipos siempre tienen formas distintas y colores distintos: si se elige para un
-// tipo una forma (o un color) que ya usa otro, ambos se la intercambian.
+// ajustes del juego guardados en localStorage (dimensión, tamaño y aspecto de las 3 fichas)
 import { TIPOS } from "./partida.js";
 
 const CLAVE = "tablero:configuracion";
@@ -24,7 +21,6 @@ export const FORMAS = {
   estrella: "Estrella",
 };
 
-// Seis tonos repartidos cada 60° en el círculo cromático (ver css/tokens.css).
 export const COLORES = {
   rojo: "Rojo",
   ambar: "Ámbar",
@@ -37,7 +33,7 @@ export const COLORES = {
 const POR_DEFECTO = {
   dimension: 5,
   tamano: "mediana",
-  // Tríada cromática (rojo, verde, azul: 120° entre sí) y tres formas bien distintas.
+  // por defecto: tríada (rojo, verde, azul) y formas fáciles de distinguir
   aspecto: [
     { forma: "circulo", color: "rojo" },
     { forma: "cuadrado", color: "verde" },
