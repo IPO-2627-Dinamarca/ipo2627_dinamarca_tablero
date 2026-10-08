@@ -1,66 +1,68 @@
-/* layout de la página con grid-template-areas
-   en móvil (<56rem) se apila en columna; el orden HTML = orden visual = orden del tabulador */
-
-.app {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas:
-    "cabecera cabecera"
-    "juego    panel"
-    "pie      pie";
-  gap: var(--espacio-4);
-  max-width: var(--ancho-pagina);
-  min-height: 100dvh; /* dvh: en el móvil no cuenta la barra del navegador */
-  margin-inline: auto;
-  padding: var(--espacio-3);
-}
-
-.cabecera {
-  grid-area: cabecera;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--espacio-2) var(--espacio-3);
-  padding-bottom: var(--espacio-3);
-  border-bottom: 1px solid var(--borde);
-}
-
-.panel {
-  grid-area: panel;
-  container-type: inline-size; /* las filas de aspecto se adaptan a su ancho */
-  align-self: start;
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-}
-
-/* Contenedor de consulta: el tablero mide su ancho (cqi) para caber siempre. */
-.juego {
-  grid-area: juego;
-  container-type: inline-size;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--espacio-3);
-}
-
-.pie {
-  grid-area: pie;
-  padding-top: var(--espacio-3);
-  border-top: 1px solid var(--borde);
-  text-align: center;
-  font-size: var(--texto-pequeno);
-  color: var(--texto-suave);
-}
-
-@media (width < 56rem) {
+@layer layout {
   .app {
-    grid-template-columns: minmax(0, 1fr);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
+    grid-template-rows: auto 1fr auto;
     grid-template-areas:
-      "cabecera"
-      "juego"
-      "panel"
-      "pie";
+      "cabecera cabecera"
+      "juego    panel"
+      "pie      pie";
+    gap: var(--espacio-4);
+    max-inline-size: var(--ancho-pagina);
+    min-block-size: 100svh;
+    margin-inline: auto;
+    padding: var(--espacio-3);
+  }
+
+  .cabecera {
+    grid-area: cabecera;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--espacio-2) var(--espacio-3);
+    padding-block-end: var(--espacio-3);
+    border-block-end: 1px solid var(--mono-borde);
+  }
+
+  /* El tablero mide sus celdas con cqi respecto a este contenedor */
+  .juego {
+    grid-area: juego;
+    container: juego / inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacio-3);
+  }
+
+  .panel {
+    grid-area: panel;
+    container: panel / inline-size;
+    align-self: start;
+  }
+
+  .pie {
+    grid-area: pie;
+    padding-block-start: var(--espacio-3);
+    border-block-start: 1px solid var(--mono-borde);
+    text-align: center;
+    font-size: var(--texto-pequeno);
+    color: var(--mono-texto-suave);
+  }
+
+  @media (width < 44rem) {
+    .app {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto 1fr auto;
+      grid-template-areas:
+        "cabecera"
+        "juego"
+        "panel"
+        "pie";
+    }
+
+    .panel {
+      justify-self: center;
+      inline-size: min(100%, var(--medida-caja));
+    }
   }
 }
