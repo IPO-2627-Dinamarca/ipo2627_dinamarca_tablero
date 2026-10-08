@@ -1,345 +1,491 @@
-/* ---------- Cabecera ---------- */
-.cabecera__titulo {
-  font-size: var(--texto-titulo);
-  font-weight: var(--peso-fuerte);
-  line-height: var(--interlineado-titulo);
+@layer componentes {
+  /* Cabecera */
+  .cabecera__titulo {
+    font-size: var(--texto-titulo);
+    font-weight: var(--peso-fuerte);
+    line-height: var(--interlineado-titulo);
+  }
+
+  .cabecera__lema { color: var(--mono-texto-suave); }
+
+  /* Panel de ajustes */
+  .panel__seccion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-3);
+    padding: var(--espacio-3);
+    background: var(--mono-superficie);
+    border: 1px solid var(--mono-borde);
+    border-radius: var(--radio-contenedor);
+  }
+
+  .panel__titulo {
+    font-size: var(--texto-destacado);
+    font-weight: var(--peso-fuerte);
+    line-height: var(--interlineado-titulo);
+  }
+
+  .marcador__etiqueta {
+    font-size: var(--texto-pequeno);
+    font-weight: var(--peso-fuerte);
+    letter-spacing: var(--espaciado-mayusculas);
+    text-transform: uppercase;
+    color: var(--mono-texto-suave);
+  }
+
+  .campo,
+  .grupo,
+  .aspecto,
+  .dialogo__contenido,
+  .dialogo__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-2);
+  }
+
+  .nota,
+  .instrucciones {
+    font-size: var(--texto-pequeno);
+    color: var(--mono-texto-suave);
+  }
+
+  /* Botones y desplegables */
+  .boton,
+  .campo__control {
+    min-block-size: var(--objetivo-minimo);
+    padding: var(--espacio-2);
+    background: var(--mono-superficie);
+    border: 1px solid var(--mono-borde);
+    border-radius: var(--radio);
+  }
+
+  .boton {
+    padding-inline: var(--espacio-3);
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+    touch-action: manipulation;
+
+    &[aria-disabled="true"] {
+      color: var(--mono-texto-suave);
+      border-style: dashed;
+      cursor: default;
+    }
+  }
+
+  .boton--principal {
+    background: var(--mono-acento);
+    border-color: var(--mono-acento);
+    color: var(--mono-sobre-acento);
+
+    &:active { background: var(--mono-acento-activo); }
+  }
+
+  .boton--icono {
+    min-inline-size: var(--objetivo-minimo);
+    padding-inline: 0;
+  }
+
+  @media (hover: hover) {
+    .boton:hover:not([aria-disabled="true"]) { border-color: var(--mono-texto); }
+    .boton--principal:hover { background: var(--mono-acento-activo); border-color: var(--mono-acento-activo); }
+  }
+
+  /* Barra de acciones, junto al tablero */
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--espacio-2);
+  }
+
+  .acciones .boton { white-space: nowrap; }
+
+  /* Estrecho: cuatro botones iguales en 2 × 2, al alcance del pulgar; el texto
+     se ajusta al ancho para que ninguna etiqueta se parta */
+  @container juego (width < 34rem) {
+    .acciones {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-self: stretch;
+    }
+
+    .acciones .boton {
+      padding-inline: var(--espacio-2);
+      font-size: clamp(var(--texto-pequeno), 4.6cqi, var(--texto-normal));
+    }
+  }
+
+  /* Formulario */
+  .campo__etiqueta,
+  .grupo__leyenda {
+    font-size: var(--texto-pequeno);
+    font-weight: var(--peso-medio);
+  }
+
+  /* legend queda fuera del gap del fieldset */
+  .grupo__leyenda { padding-block-end: var(--espacio-2); }
+
+  .campo__control { inline-size: 100%; }
+
+  /* Control segmentado: radios ocultos, la etiqueta hace de botón */
+  .segmentado { display: flex; }
+
+  .segmentado__opcion {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    min-block-size: var(--objetivo-minimo);
+    padding-inline: var(--espacio-2);
+    background: var(--mono-superficie);
+    border: 1px solid var(--mono-borde);
+    cursor: pointer;
+
+    &:has(:checked) {
+      background: var(--mono-acento);
+      border-color: var(--mono-acento);
+      color: var(--mono-sobre-acento);
+      font-weight: var(--peso-medio);
+    }
+
+    &:has(:focus-visible) {
+      z-index: 1;
+      outline: var(--anillo) solid var(--mono-acento);
+      outline-offset: 2px;
+    }
+  }
+
+  /* Bordes compartidos y esquinas redondeadas solo en los extremos */
+  .segmentado__opcion + .segmentado__opcion { margin-inline-start: -1px; }
+  .segmentado__opcion:first-child { border-start-start-radius: var(--radio); border-end-start-radius: var(--radio); }
+  .segmentado__opcion:last-child { border-start-end-radius: var(--radio); border-end-end-radius: var(--radio); }
+
+  @media (hover: hover) {
+    .segmentado__opcion:hover:not(:has(:checked)) { border-color: var(--mono-texto); z-index: 1; }
+  }
+
+  .aspecto__cabecera,
+  .aspecto__ficha {
+    display: grid;
+    grid-template-columns: var(--celda-pequena) minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--espacio-2);
+  }
+
+  /* Rótulos de columna una sola vez; cada desplegable conserva su label */
+  .aspecto__cabecera {
+    align-items: end;
+    font-size: var(--texto-pequeno);
+    font-weight: var(--peso-medio);
+  }
+
+  /* Panel estrecho: forma y color apilados; los valores ya se explican solos */
+  @container panel (width < 20rem) {
+    .aspecto__cabecera { display: none; }
+    .aspecto__ficha { grid-template-columns: var(--celda-pequena) minmax(0, 1fr); }
+    .aspecto__muestra { grid-row: span 2; align-self: center; }
+  }
+
+  .aspecto__muestra {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: var(--mono-celda);
+    border-radius: var(--radio);
+  }
+
+  /* Marcador */
+  .marcador {
+    display: flex;
+    gap: var(--espacio-4);
+    text-align: center;
+  }
+
+  .marcador__valor {
+    font-size: var(--texto-destacado);
+    font-weight: var(--peso-fuerte);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Tablero */
+  .marco {
+    position: relative; /* referencia de la capa de victoria */
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-inline-size: min(var(--marco-minimo), 100%);
+    min-block-size: var(--marco-alto-minimo);
+    padding: var(--espacio-3);
+    background: var(--mono-tablero);
+    border: 1px solid var(--mono-borde); /* región común, también en modo oscuro */
+    border-radius: var(--radio-contenedor);
+  }
+
+  /* N columnas entre dos medias: la de la marca ✓ y su espejo, que mantiene las fichas
+     centradas. La celda es la del tamaño elegido salvo que no quepa en el ancho:
+     N + 1 celdas y N + 1 huecos. */
+  .tablero {
+    --celda: min(
+      var(--celda-tamano),
+      (100cqi - 2 * var(--espacio-3) - 2px) / ((var(--n) + 1) * (1 + var(--hueco-columna)))
+    );
+    display: grid;
+    grid-template-columns: calc(var(--celda) / 2) repeat(var(--n), var(--celda)) calc(var(--celda) / 2);
+    grid-auto-rows: var(--celda);
+    gap: calc(var(--celda) * var(--hueco-fila)) calc(var(--celda) * var(--hueco-columna));
+  }
+
+  .tablero--pequena { --celda-tamano: var(--celda-pequena); }
+  .tablero--mediana { --celda-tamano: var(--celda-mediana); }
+  .tablero--grande { --celda-tamano: var(--celda-grande); }
+
+  /* Cada fila es una caja real que comparte las columnas del tablero */
+  .tablero__fila {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-radius: var(--radio);
+  }
+
+  /* Ocupa la media columna espejo de la marca */
+  .tablero__fila::before { content: ""; }
+
+  /* Fila completa: una sola franja continua (región común) */
+  .tablero__fila--completa {
+    background: var(--mono-celda-completa);
+    box-shadow: 0 0 0 calc(var(--celda) * var(--hueco-columna)) var(--mono-celda-completa);
+  }
+
+  .tablero__marca {
+    display: grid;
+    place-items: center;
+    color: var(--mono-ayuda);
+    font-size: calc(var(--celda) * 0.4);
+    font-weight: var(--peso-fuerte);
+  }
+
+  /* Celda: toda ella es la zona pulsable y arrastrable */
+  .celda {
+    --anillo-dentro: 0px;
+    --anillo-fuera: 0px;
+    position: relative; /* referencia de la insignia ⇄ */
+    display: grid;
+    place-items: center;
+    background: var(--mono-celda);
+    border-radius: var(--radio);
+    box-shadow:
+      inset 0 0 0 var(--anillo-dentro) var(--mono-ayuda),
+      0 0 0 var(--anillo-fuera) var(--mono-ayuda);
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+
+    &[draggable="true"] { cursor: grab; }
+
+    &:focus-visible {
+      z-index: var(--capa-celda);
+      outline-color: var(--mono-ayuda);
+    }
+
+    &.celda--completa { background: transparent; }
+
+    &.celda--pista,
+    &.celda--destino {
+      --anillo-fuera: var(--anillo);
+      z-index: var(--capa-celda);
+    }
+
+    &.celda--destino { background: var(--mono-celda-destino); }
+
+    &.celda--seleccionada {
+      --anillo-dentro: var(--anillo);
+      --escala: 1.15;
+      background: var(--mono-celda-seleccionada);
+    }
+
+    /* Por encima de las vecinas mientras su ficha se desliza */
+    &.celda--viaje { z-index: var(--capa-celda); }
+
+    &.celda--origen {
+      outline: 2px dashed var(--mono-ayuda);
+      outline-offset: calc(-2 * var(--anillo));
+    }
+  }
+
+  @media (hover: hover) {
+    .celda:hover:not(.celda--seleccionada) { --escala: 1.08; }
+  }
+
+  /* Insignia ⇄: sobresale de la esquina para no tapar la ficha */
+  .celda--pista::after,
+  .celda--destino::after {
+    content: "⇄";
+    position: absolute;
+    inset-block-start: calc(var(--celda) * -0.12);
+    inset-inline-end: calc(var(--celda) * -0.12);
+    display: grid;
+    place-items: center;
+    inline-size: min(var(--insignia), calc(var(--celda) * 0.45));
+    aspect-ratio: 1;
+    background: var(--mono-ayuda);
+    color: var(--mono-sobre-ayuda);
+    border-radius: 50%;
+    font-size: min(var(--texto-pequeno), calc(var(--celda) * 0.3));
+    font-weight: var(--peso-fuerte);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  /* Ficha: solo dibuja la forma; los eventos van a la celda */
+  .ficha {
+    inline-size: var(--ficha-proporcion);
+    aspect-ratio: 1;
+    background: var(--color-ficha);
+    scale: var(--escala, 1);
+    pointer-events: none;
+  }
+
+  .celda--igual .ficha,
+  .celda--origen .ficha {
+    opacity: 0.35;
+  }
+
+  .ficha--muestra { inline-size: 70%; }
+
+  .ficha--circulo { border-radius: 50%; }
+  .ficha--cuadrado { border-radius: 12%; }
+  .ficha--triangulo { clip-path: polygon(50% 4%, 98% 92%, 2% 92%); }
+  .ficha--rombo { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+  .ficha--hexagono { clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); }
+  .ficha--estrella { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 71%, 21% 92%, 32% 57%, 2% 35%, 39% 35%); }
+
+  .ficha--tono-1 { --color-ficha: var(--hexa-1); }
+  .ficha--tono-2 { --color-ficha: var(--hexa-2); }
+  .ficha--tono-3 { --color-ficha: var(--hexa-3); }
+  .ficha--tono-4 { --color-ficha: var(--hexa-4); }
+  .ficha--tono-5 { --color-ficha: var(--hexa-5); }
+  .ficha--tono-6 { --color-ficha: var(--hexa-6); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tablero__fila--nueva { animation: destello var(--duracion-destello) ease-out; }
+  }
+
+  @keyframes destello {
+    from {
+      background-color: var(--mono-celda-destello);
+      box-shadow: 0 0 0 calc(var(--celda) * var(--hueco-fila)) var(--mono-celda-destello);
+    }
+  }
+
+  /* Capa de victoria: deja ver el tablero resuelto */
+  .victoria {
+    position: absolute;
+    inset: 0;
+    z-index: var(--capa-victoria);
+    display: grid;
+    place-items: center;
+    padding: var(--espacio-2);
+    background: var(--mono-velo-ligero);
+    border-radius: inherit;
+  }
+
+  .victoria__tarjeta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--espacio-2);
+    padding: var(--espacio-3);
+    background: var(--mono-superficie);
+    color: var(--mono-texto);
+    border: 1px solid var(--mono-borde);
+    border-radius: var(--radio-contenedor);
+    text-align: center;
+  }
+
+  .victoria__record { color: var(--mono-texto-suave); }
+
+  .victoria__titulo,
+  .dialogo__titulo {
+    font-size: var(--texto-destacado);
+    font-weight: var(--peso-fuerte);
+    line-height: var(--interlineado-titulo);
+  }
+
+  /* Mensajes */
+  .mensaje,
+  .instrucciones,
+  .aviso {
+    max-inline-size: var(--medida);
+    text-align: center;
+  }
+
+  /* Reserva el alto del mensaje más largo para que la página no salte */
+  .mensaje {
+    min-block-size: 2lh;
+    font-weight: var(--peso-medio);
+  }
+
+  @container juego (width < 34rem) {
+    .mensaje { min-block-size: 3lh; }
+  }
+
+  .aviso { font-weight: var(--peso-medio); }
+
+  /* Instrucciones según el dispositivo de entrada */
+  @media (pointer: coarse) {
+    .instrucciones__puntero { display: none; }
+  }
+
+  @media not (pointer: coarse) {
+    .instrucciones__tactil { display: none; }
+  }
+
+  /* Diálogos */
+  .dialogo {
+    inline-size: min(var(--medida-caja), 100% - var(--espacio-4));
+    max-block-size: calc(100dvh - var(--espacio-4));
+    overflow-y: auto;
+    padding: var(--espacio-4);
+    background: var(--mono-superficie);
+    color: var(--mono-texto);
+    border: 1px solid var(--mono-borde);
+    border-radius: var(--radio-contenedor);
+  }
+
+  @media (width < 30rem) {
+    .dialogo { padding: var(--espacio-3); }
+  }
+
+  .dialogo::backdrop { background: var(--mono-velo); }
+
+  .dialogo__cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--espacio-3);
+  }
+
+  .dialogo__contenido { gap: var(--espacio-3); }
+  .dialogo__lista { padding-inline-start: 1.25em; }
+  .dialogo__aceptar { align-self: flex-end; }
+
+  .dialogo__botones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--espacio-2);
+  }
+
+  /* Alto contraste: el color de las fichas y la opción marcada son información */
+  @media (forced-colors: active) {
+    .marco,
+    .aspecto__muestra {
+      forced-color-adjust: none;
+    }
+
+    .segmentado__opcion:has(:checked) {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
 }
-
-.cabecera__lema { color: var(--texto-suave); }
-
-/* ---------- Panel lateral ---------- */
-.panel__seccion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3);
-  background: var(--superficie);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-}
-
-/* Etiquetas pequeñas: realce por grosor y mayúsculas espaciadas. */
-.panel__titulo,
-.marcador__etiqueta {
-  font-size: var(--texto-pequeno);
-  font-weight: var(--peso-fuerte);
-  letter-spacing: var(--espaciado-mayusculas);
-  text-transform: uppercase;
-  color: var(--texto-suave);
-}
-
-/* elementos apilados en columna */
-.acciones,
-.campo,
-.grupo,
-.aspecto,
-.dialogo__contenido,
-.dialogo__lista {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-}
-
-.nota,
-.instrucciones {
-  font-size: var(--texto-pequeno);
-  color: var(--texto-suave);
-}
-
-/* ---------- Botones y listas desplegables ---------- */
-.boton,
-.campo__control {
-  padding: var(--espacio-2);
-  background: var(--superficie);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-}
-
-.boton {
-  font-weight: var(--peso-medio);
-  cursor: pointer;
-}
-
-.boton:hover { border-color: var(--texto); }
-
-.boton--principal {
-  background: var(--acento);
-  border-color: var(--acento);
-  color: var(--texto-sobre-acento);
-}
-
-/* ---------- Campos de formulario ---------- */
-.campo__etiqueta,
-.grupo__leyenda {
-  font-size: var(--texto-pequeno);
-  font-weight: var(--peso-medio);
-}
-
-/* legend no participa en el flex del fieldset (el gap no la separa): se separa con padding. */
-.grupo__leyenda { padding-bottom: var(--espacio-2); }
-
-.campo__control { width: 100%; }
-
-.segmentado {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espacio-1) var(--espacio-3);
-}
-
-.segmentado__opcion {
-  display: flex;
-  align-items: center;
-  gap: var(--espacio-1);
-  cursor: pointer;
-}
-
-.aspecto__ficha {
-  display: grid;
-  grid-template-columns: var(--celda-pequena) minmax(0, 1fr) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--espacio-2);
-}
-
-/* Panel muy estrecho (móvil de 320 px): forma y color apilados para que no se recorten.
-   El panel es contenedor de consulta (ver layout.css). */
-@container (width < 20rem) {
-  .aspecto__ficha { grid-template-columns: var(--celda-pequena) minmax(0, 1fr); }
-  .aspecto__muestra { grid-row: span 2; align-self: center; }
-}
-
-.aspecto__muestra {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  background: var(--celda-fondo);
-  border-radius: var(--radio);
-}
-
-/* ---------- Marcador ---------- */
-.marcador {
-  display: flex;
-  gap: var(--espacio-4);
-  text-align: center;
-}
-
-.marcador__valor {
-  font-size: var(--texto-destacado);
-  font-weight: var(--peso-fuerte);
-  font-variant-numeric: tabular-nums; /* las cifras no "bailen" al cambiar */
-}
-
-/* ---------- Tablero ---------- */
-/* relative para que la capa de victoria se posicione sobre él; el min-width le da sitio */
-.marco {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-width: min(20rem, 100%);
-  min-height: 13rem;
-  padding: var(--espacio-3);
-  background: var(--tablero-fondo);
-  border: 1px solid var(--borde); /* región común: delimita el tablero también en modo oscuro */
-  border-radius: var(--radio);
-}
-
-/* En colores forzados (alto contraste) el navegador borraría el color de las fichas,
-   que es la información del juego: el tablero conserva sus colores. */
-@media (forced-colors: active) {
-  .marco { forced-color-adjust: none; }
-}
-
-/* Rejilla de N columnas (--n llega desde JS) más una estrecha para la marca ✓ de fila.
-   El lado de la celda es el del tamaño elegido, salvo que no quepa en el ancho
-   disponible (100cqi = ancho de .juego). */
-.tablero {
-  --celda: min(var(--celda-tamano), calc((100cqi - 2 * var(--espacio-3)) / (var(--n) * 1.1 + 1)));
-  display: grid;
-  grid-template-columns: repeat(var(--n), var(--celda)) calc(var(--celda) / 2);
-  grid-auto-rows: var(--celda);
-  /* Proximidad: las filas más separadas que las columnas (el juego va por filas). */
-  gap: calc(var(--celda) * 0.18) calc(var(--celda) * 0.06);
-  /* Compensa la columna ✓ de la derecha para que las fichas queden centradas en el marco. */
-  margin-left: calc(var(--celda) * 0.56);
-}
-
-.tablero--pequena { --celda-tamano: var(--celda-pequena); }
-.tablero--mediana { --celda-tamano: var(--celda-mediana); }
-.tablero--grande { --celda-tamano: var(--celda-grande); }
-
-/* La fila solo agrupa (role="row"): sus celdas participan directamente en la rejilla. */
-.tablero__fila { display: contents; }
-
-.tablero__marca {
-  display: grid;
-  place-items: center;
-  color: var(--ayuda);
-  font-size: calc(var(--celda) * 0.4);
-  font-weight: var(--peso-fuerte);
-}
-
-/* ---------- Celda ---------- */
-.celda {
-  position: relative; /* referencia de la marca de la esquina (::after) */
-  display: grid;
-  place-items: center;
-  background: var(--celda-fondo);
-  border-radius: var(--radio);
-}
-
-.celda--completa,
-.celda--destino {
-  background: var(--celda-completa);
-}
-
-/* El foco se dibuja en la celda: el recorte (clip-path) de la ficha lo ocultaría. */
-.celda:has(.ficha:focus-visible) {
-  outline: var(--anillo) solid var(--ayuda);
-  outline-offset: 2px;
-}
-
-/* Las celdas son relative: la siguiente se pintaría encima del anillo y de la marca de
-   esta. Las que llevan ayuda o foco se suben un nivel. */
-.celda:has(.ficha:focus-visible),
-.celda--pista,
-.celda--destino {
-  z-index: 1;
-}
-
-.celda--pista,
-.celda--destino {
-  box-shadow: 0 0 0 var(--anillo) var(--ayuda);
-}
-
-/* Seleccionada: anillo por DENTRO, distinto del foco y de la pista (por fuera). */
-.celda--seleccionada {
-  box-shadow: inset 0 0 0 var(--anillo) var(--ayuda);
-}
-
-/* Seleccionada + pista o seleccionada + destino: anillo interior y exterior a la vez. */
-.celda--seleccionada.celda--pista,
-.celda--seleccionada.celda--destino {
-  box-shadow: inset 0 0 0 var(--anillo) var(--ayuda), 0 0 0 var(--anillo) var(--ayuda);
-}
-
-/* Mientras se arrastra, el borde discontinuo del origen sustituye al anillo de selección. */
-.celda--seleccionada.celda--origen {
-  box-shadow: none;
-}
-
-/* Origen del arrastre: borde discontinuo dibujado dentro de la celda (desplazamiento
-   negativo) para no chocar con el anillo de la pista. Gana también al foco. */
-.celda--origen,
-.celda--origen:has(.ficha:focus-visible) {
-  outline: 2px dashed var(--ayuda);
-  outline-offset: -4px;
-}
-
-/* Marca de ayuda en la esquina superior derecha, superpuesta a la celda. */
-.celda--pista::after,
-.celda--destino::after {
-  position: absolute;
-  /* Sobresale de la esquina (desplazamiento negativo) para no tapar la ficha; su tamaño
-     se ajusta a la celda para no tapar nada en tableros pequeños. */
-  top: calc(var(--celda) * -0.12);
-  right: calc(var(--celda) * -0.12);
-  display: grid;
-  place-items: center;
-  width: min(1.4rem, calc(var(--celda) * 0.45));
-  aspect-ratio: 1;
-  background: var(--ayuda);
-  color: var(--ayuda-texto);
-  border-radius: 50%;
-  font-size: min(var(--texto-pequeno), calc(var(--celda) * 0.3));
-  font-weight: var(--peso-fuerte);
-  pointer-events: none;
-}
-
-.celda--pista::after { content: "?"; }
-.celda--destino::after { content: "⇄"; }
-
-/* ---------- Ficha: forma (border-radius / clip-path) y color (variable) ---------- */
-.ficha {
-  width: 76%;
-  aspect-ratio: 1;
-  background: var(--color-ficha);
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-}
-
-.ficha:focus-visible { outline: none; } /* lo dibuja la celda */
-
-.ficha--muestra {
-  width: 70%;
-  cursor: default;
-}
-
-.ficha--arrastrada { opacity: 0.3; }
-
-.ficha--circulo { border-radius: 50%; }
-.ficha--cuadrado { border-radius: 12%; }
-.ficha--triangulo { clip-path: polygon(50% 4%, 98% 92%, 2% 92%); }
-.ficha--rombo { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-.ficha--hexagono { clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); }
-.ficha--estrella { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 71%, 21% 92%, 32% 57%, 2% 35%, 39% 35%); }
-
-.ficha--rojo { --color-ficha: var(--ficha-tono-1); }
-.ficha--ambar { --color-ficha: var(--ficha-tono-2); }
-.ficha--verde { --color-ficha: var(--ficha-tono-3); }
-.ficha--turquesa { --color-ficha: var(--ficha-tono-4); }
-.ficha--azul { --color-ficha: var(--ficha-tono-5); }
-.ficha--violeta { --color-ficha: var(--ficha-tono-6); }
-
-/* ---------- Capa de victoria: absoluta sobre el marco, tapa el tablero terminado ---------- */
-.victoria {
-  position: absolute;
-  inset: 0;
-  z-index: 2; /* por encima de las celdas con z-index: 1 (pista/destino/foco) */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3);
-  background: var(--velo);
-  border-radius: var(--radio);
-  color: var(--ayuda);
-  text-align: center;
-}
-
-/* Sobre el velo oscuro el acento no contrasta: el foco usa el color de ayuda. */
-.victoria :focus-visible { outline-color: var(--ayuda); }
-
-.victoria__titulo,
-.dialogo__titulo {
-  font-size: var(--texto-destacado);
-  font-weight: var(--peso-fuerte);
-  line-height: var(--interlineado-titulo);
-}
-
-/* ---------- Mensajes ---------- */
-.mensaje,
-.instrucciones {
-  max-width: var(--medida);
-  text-align: center;
-}
-
-.mensaje {
-  min-height: 3em; /* hueco para dos líneas: el tablero no salta al cambiar el texto */
-  font-weight: var(--peso-medio);
-}
-
-/* ---------- Ventana de ayuda (dialog nativo) ---------- */
-.dialogo {
-  max-width: min(34rem, 100% - var(--espacio-4));
-  max-height: calc(100dvh - var(--espacio-4));
-  overflow-y: auto;
-  padding: var(--espacio-4);
-  background: var(--superficie);
-  color: var(--texto);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-}
-
-.dialogo__lista { padding-left: 1.25em; }
-.dialogo__cerrar { align-self: flex-end; }
