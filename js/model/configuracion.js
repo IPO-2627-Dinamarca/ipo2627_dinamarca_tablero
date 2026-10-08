@@ -1,51 +1,25 @@
-// ajustes del juego guardados en localStorage (dimensión, tamaño y aspecto de las 3 fichas)
-import { TIPOS } from "./partida.js";
+import { COLORES, DIMENSION_MAX, DIMENSION_MIN, FORMAS, TAMANOS, TIPOS } from "./constantes.js";
+import { guardar, leer } from "./almacen.js";
 
 const CLAVE = "tablero:configuracion";
-
-export const DIMENSION_MIN = 3;
-export const DIMENSION_MAX = 9;
-
-const TAMANOS = {
-  pequena: "Pequeña",
-  mediana: "Mediana",
-  grande: "Grande",
-};
-
-export const FORMAS = {
-  circulo: "Círculo",
-  cuadrado: "Cuadrado",
-  triangulo: "Triángulo",
-  rombo: "Rombo",
-  hexagono: "Hexágono",
-  estrella: "Estrella",
-};
-
-export const COLORES = {
-  rojo: "Rojo",
-  ambar: "Ámbar",
-  verde: "Verde",
-  turquesa: "Turquesa",
-  azul: "Azul",
-  violeta: "Violeta",
-};
 
 const POR_DEFECTO = {
   dimension: 5,
   tamano: "mediana",
-  // por defecto: tríada (rojo, verde, azul) y formas fáciles de distinguir
+  // tríada (tonos a 120°) y formas fáciles de distinguir
   aspecto: [
-    { forma: "circulo", color: "rojo" },
-    { forma: "cuadrado", color: "verde" },
-    { forma: "triangulo", color: "azul" },
+    { forma: "circulo", color: "tono-1" },
+    { forma: "cuadrado", color: "tono-3" },
+    { forma: "triangulo", color: "tono-5" },
   ],
 };
 
+/** Ajustes del juego, persistidos en localStorage. */
 export class Configuracion {
   #datos;
 
   constructor() {
-    this.#datos = validar(this.#leer());
+    this.#datos = validar(leer(CLAVE));
   }
 
   get dimension() {
@@ -56,6 +30,7 @@ export class Configuracion {
     return this.#datos.tamano;
   }
 
+  /** Copia de la forma y el color de cada tipo. */
   get aspecto() {
     return this.#datos.aspecto.map((ficha) => ({ ...ficha }));
   }
@@ -64,91 +39,54 @@ export class Configuracion {
     const n = normalizarDimension(valor);
     if (n === null) return;
     this.#datos.dimension = n;
-    this.#guardar();
+    guardar(CLAVE, this.#datos);
   }
 
   set tamano(valor) {
-    if (!esClave(TAMANOS, valor)) return;
+    if (!TAMANOS.includes(valor)) return;
     this.#datos.tamano = valor;
-    this.#guardar();
+    guardar(CLAVE, this.#datos);
   }
 
+  /** Cambia la forma de un tipo; si otro la tenía, se intercambian. */
   cambiarForma(tipo, forma) {
-    if (esClave(FORMAS, forma)) this.#cambiarRasgo(tipo, "forma", forma);
+    if (FORMAS.includes(forma)) this.#cambiarRasgo(tipo, "forma", forma);
   }
 
+  /** Cambia el color de un tipo; si otro lo tenía, se intercambian. */
   cambiarColor(tipo, color) {
-    if (esClave(COLORES, color)) this.#cambiarRasgo(tipo, "color", color);
-  }
-
-  // Texto legible para el usuario, p. ej. "triángulo azul".
-  describir(tipo) {
-    if (!this.#esTipo(tipo)) return "ficha";
-    const { forma, color } = this.#datos.aspecto[tipo];
-    return `${FORMAS[forma]} ${COLORES[color]}`.toLowerCase();
+    if (COLORES.includes(color)) this.#cambiarRasgo(tipo, "color", color);
   }
 
   #cambiarRasgo(tipo, rasgo, valor) {
-    if (!this.#esTipo(tipo)) return;
+    if (!Number.isInteger(tipo) || tipo < 0 || tipo >= TIPOS) return;
     const aspecto = this.#datos.aspecto;
     const otro = aspecto.find((ficha) => ficha[rasgo] === valor);
     if (otro) otro[rasgo] = aspecto[tipo][rasgo];
     aspecto[tipo][rasgo] = valor;
-    this.#guardar();
-  }
-
-  #esTipo(tipo) {
-    return Number.isInteger(tipo) && tipo >= 0 && tipo < TIPOS;
-  }
-
-  #leer() {
-    try {
-      return JSON.parse(localStorage.getItem(CLAVE)) ?? {};
-    } catch {
-      return {};
-    }
-  }
-
-  #guardar() {
-    try {
-      localStorage.setItem(CLAVE, JSON.stringify(this.#datos));
-    } catch {
-      // almacenamiento no disponible: la configuración solo dura la sesión
-    }
+    guardar(CLAVE, this.#datos);
   }
 }
 
-// Descarta lo guardado que no sea válido (versiones antiguas, datos manipulados...).
+// Descarta lo guardado que no sea válido.
 function validar(guardado) {
   if (typeof guardado !== "object" || guardado === null) guardado = {};
   const aspecto = Array.isArray(guardado.aspecto) ? guardado.aspecto : [];
   const aspectoValido =
     aspecto.length === TIPOS &&
-    aspecto.every(
-      (ficha) =>
-        esClave(FORMAS, ficha?.forma) && esClave(COLORES, ficha?.color),
-    ) &&
+    aspecto.every((ficha) => FORMAS.includes(ficha?.forma) && COLORES.includes(ficha?.color)) &&
     new Set(aspecto.map((ficha) => ficha.forma)).size === TIPOS &&
     new Set(aspecto.map((ficha) => ficha.color)).size === TIPOS;
 
   return {
     dimension: normalizarDimension(guardado.dimension) ?? POR_DEFECTO.dimension,
-    tamano: esClave(TAMANOS, guardado.tamano) ? guardado.tamano : POR_DEFECTO.tamano,
+    tamano: TAMANOS.includes(guardado.tamano) ? guardado.tamano : POR_DEFECTO.tamano,
     aspecto: (aspectoValido ? aspecto : POR_DEFECTO.aspecto).map(({ forma, color }) => ({ forma, color })),
   };
 }
 
-// Número entero dentro de [DIMENSION_MIN, DIMENSION_MAX], o null si no es un número.
-// La usan tanto el selector como la lectura de localStorage, así aceptan lo mismo.
+// Entero dentro de [DIMENSION_MIN, DIMENSION_MAX], o null si no es un número.
 function normalizarDimension(valor) {
-  if (typeof valor !== "number" && typeof valor !== "string") return null;
-  const n = Math.round(Number(valor));
-  if (!Number.isFinite(n) || String(valor).trim() === "") return null;
-  return Math.min(DIMENSION_MAX, Math.max(DIMENSION_MIN, n));
-}
-
-// ¿Es valor una de las claves de la tabla? Solo cadenas: Object.hasOwn convertiría
-// ["circulo"] en "circulo". La usan los setters y la lectura, así aceptan lo mismo.
-function esClave(tabla, valor) {
-  return typeof valor === "string" && Object.hasOwn(tabla, valor);
+  const n = Number.parseInt(valor, 10);
+  return Number.isNaN(n) ? null : Math.min(DIMENSION_MAX, Math.max(DIMENSION_MIN, n));
 }
