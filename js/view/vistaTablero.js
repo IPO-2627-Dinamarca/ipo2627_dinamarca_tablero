@@ -1,24 +1,32 @@
-// Vista del tablero. Usa data-* para localizar elementos (no clases) para que
-// refactorizar CSS no rompa el JS.
-import { aplicarAspecto } from "./ficha.js";
+import { $, aplicarAspecto } from "./dom.js";
+import { nombreFicha } from "./textos.js";
 
-const $ = (selector) => document.querySelector(selector);
-
-// Formato MIME con el que viaja en dataTransfer la celda de origen del arrastre.
+// Tipo MIME de los datos del arrastre.
 const FORMATO = "application/json";
 
+const conMovimiento = matchMedia("(prefers-reduced-motion: no-preference)");
+
+/** Rejilla de juego: la pinta y traduce arrastre, clics y teclado en avisos al controlador. */
 export class VistaTablero {
   #tablero = $('[data-vista="tablero"]');
   #victoria = $('[data-vista="victoria"]');
-  #resumenVictoria = $('[data-vista="resumen-victoria"]');
+  #resumen = $('[data-vista="resumen-victoria"]');
+  #record = $('[data-vista="record-victoria"]');
+  #revancha = $('[data-accion="revancha"]');
   #n = 0;
-  #foco = 0; // ficha que recibe el tabulador (tabindex "itinerante")
-  #origen = null; // ficha que se está arrastrando
-  #destino = null; // celda resaltada mientras se arrastra encima
+  #foco = 0; // tabindex itinerante
+  #origen = null; // celda que se está arrastrando
+  #destino = null; // celda resaltada como destino
+  #alElegir = () => {};
   #alSoltar = () => {};
 
   constructor() {
+    this.#tablero.addEventListener("click", (e) => {
+      const celda = e.target.closest("[data-celda]");
+      if (celda) this.#alElegir(Number(celda.dataset.celda));
+    });
     this.#tablero.addEventListener("dragstart", (e) => this.#comienzoArrastre(e));
+    this.#tablero.addEventListener("dragenter", (e) => this.#sobrevolando(e));
     this.#tablero.addEventListener("dragover", (e) => this.#sobrevolando(e));
     this.#tablero.addEventListener("dragleave", (e) => this.#saliendo(e));
     this.#tablero.addEventListener("drop", (e) => this.#soltado(e));
@@ -27,8 +35,73 @@ export class VistaTablero {
     this.#tablero.addEventListener("keydown", (e) => this.#navegar(e));
   }
 
-  // { n, tamano, fichas, filasCompletas, seleccionada?, pista?, bloqueado? }
-  pintar({ n, tamano, fichas, filasCompletas, seleccionada = null, pista = [], bloqueado = false }) {
+  /** Redibuja el tablero; si viene un intercambio, las dos fichas se desplazan a su nuevo sitio. */
+  pintar(estado) {
+    const par = estado.intercambio;
+    const animar = par && conMovimiento.matches;
+    const antes = animar ? par.map((indice) => this.#fichaEn(indice).getBoundingClientRect()) : [];
+    this.#dibujar(estado);
+    if (animar) this.#deslizar(par, antes);
+  }
+
+  /** Nombre visible de una ficha, p. ej. "triángulo azul". */
+  nombre(aspecto) {
+    return nombreFicha(aspecto);
+  }
+
+  mostrarVictoria(resumen, record) {
+    this.#resumen.textContent = resumen;
+    this.#record.textContent = record;
+    this.#victoria.hidden = false;
+    this.#revancha.focus();
+  }
+
+  ocultarVictoria() {
+    this.#victoria.hidden = true;
+  }
+
+  enfocar() {
+    this.#celdaEn(this.#foco)?.focus();
+  }
+
+  alSeleccionar(callback) {
+    this.#alElegir = callback;
+  }
+
+  alIntercambiar(callback) {
+    this.#alSoltar = callback;
+  }
+
+  // Esc cancela la selección desde cualquier sitio salvo los diálogos, donde solo los cierra.
+  alCancelar(callback) {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !e.target.closest?.("dialog")) callback();
+    });
+  }
+
+  alRevancha(callback) {
+    this.#revancha.addEventListener("click", () => callback());
+  }
+
+  // FLIP: cada ficha empieza donde estaba la otra y se desliza hasta su celda.
+  // Web Animations no bloquea la entrada mientras dura, a diferencia de View Transitions.
+  #deslizar([a, b], [desdeA, desdeB]) {
+    const duracion = parseFloat(getComputedStyle(this.#tablero).getPropertyValue("--duracion-breve"));
+    for (const [indice, desde] of [[a, desdeB], [b, desdeA]]) {
+      const ficha = this.#fichaEn(indice);
+      const hasta = ficha.getBoundingClientRect();
+      const celda = ficha.parentElement;
+      celda.classList.add("celda--viaje");
+      const animacion = ficha.animate(
+        [{ translate: `${desde.x - hasta.x}px ${desde.y - hasta.y}px` }, { translate: "0 0" }],
+        { duration: duracion, easing: "ease-out" },
+      );
+      animacion.onfinish = () => celda.classList.remove("celda--viaje");
+    }
+  }
+
+  #dibujar(estado) {
+    const { n, tamano, fichas, filasCompletas, filasNuevas = [], seleccionada = null, pista = [], bloqueado = false } = estado;
     const teniaFoco = this.#tablero.contains(document.activeElement);
     if (n !== this.#n) this.#foco = 0;
     this.#n = n;
@@ -36,18 +109,21 @@ export class VistaTablero {
     this.#tablero.style.setProperty("--n", n);
     this.#tablero.className = `tablero tablero--${tamano}`;
     this.#tablero.setAttribute("aria-label", `Tablero de ${n} por ${n}`);
+    const tipoSeleccionado = seleccionada === null ? null : fichas[seleccionada].tipo;
 
     const filas = filasCompletas.map((completa, fila) => {
       const elemento = document.createElement("div");
       elemento.className = "tablero__fila";
+      elemento.classList.toggle("tablero__fila--completa", completa);
+      elemento.classList.toggle("tablero__fila--nueva", filasNuevas.includes(fila));
       elemento.setAttribute("role", "row");
-      elemento.setAttribute("aria-label", `Fila ${fila + 1}`);
 
       for (let columna = 0; columna < n; columna++) {
         const indice = fila * n + columna;
         elemento.append(
           this.#crearCelda(indice, fichas[indice], {
             seleccionada: indice === seleccionada,
+            igual: indice !== seleccionada && fichas[indice].tipo === tipoSeleccionado,
             pista: pista.includes(indice),
             completa,
             bloqueado,
@@ -59,130 +135,105 @@ export class VistaTablero {
     });
 
     this.#tablero.replaceChildren(...filas);
-    // cuando ganas, el tablero queda inert bajo la capa de victoria
+    // terminada la partida, queda inerte bajo la capa de victoria
     this.#tablero.inert = bloqueado;
-    if (teniaFoco) this.#fichaEn(this.#foco)?.focus();
+    if (teniaFoco) this.enfocar();
   }
 
-  mostrarVictoria(texto) {
-    this.#resumenVictoria.textContent = texto;
-    this.#victoria.hidden = false;
-    this.#victoria.querySelector("[data-accion]").focus();
-  }
-
-  ocultarVictoria() {
-    this.#victoria.hidden = true;
-  }
-
-  enfocar() {
-    this.#fichaEn(this.#foco)?.focus();
-  }
-
-  alSeleccionar(callback) {
-    this.#tablero.addEventListener("click", (e) => {
-      const ficha = e.target.closest("[data-ficha]");
-      if (ficha) callback(Number(ficha.dataset.ficha));
-    });
-    this.#tablero.addEventListener("keydown", (e) => {
-      const ficha = e.target.closest("[data-ficha]");
-      if (!ficha || (e.key !== "Enter" && e.key !== " ")) return;
-      e.preventDefault();
-      callback(Number(ficha.dataset.ficha));
-    });
-  }
-
-  alIntercambiar(callback) {
-    this.#alSoltar = callback;
-  }
-
-  // Esc cancela la selección esté donde esté el foco (también en los botones del panel),
-  // salvo dentro de la ventana de ayuda: ahí Esc solo la cierra.
-  alCancelar(callback) {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !e.target.closest?.("dialog")) callback();
-    });
-  }
-
-  // flechas para mover el foco entre fichas, sin afectar al modelo
-  #navegar(e) {
-    const pasos = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
-    const ficha = e.target.closest("[data-ficha]");
-    // Con Alt/Ctrl/Meta las flechas son atajos del navegador (p. ej. Alt+← = atrás).
-    if (!ficha || !(e.key in pasos) || e.altKey || e.ctrlKey || e.metaKey) return;
-    e.preventDefault();
-    const [df, dc] = pasos[e.key];
-    const indice = Number(ficha.dataset.ficha);
-    const fila = Math.min(this.#n - 1, Math.max(0, Math.floor(indice / this.#n) + df));
-    const columna = Math.min(this.#n - 1, Math.max(0, (indice % this.#n) + dc));
-    this.#fichaEn(fila * this.#n + columna)?.focus();
-  }
-
-  #crearCelda(indice, { aspecto, descripcion }, { seleccionada, pista, completa, bloqueado }) {
+  #crearCelda(indice, { tipo, aspecto }, estado) {
     const celda = document.createElement("div");
     celda.className = "celda";
-    celda.classList.toggle("celda--seleccionada", seleccionada);
-    celda.classList.toggle("celda--pista", pista);
-    celda.classList.toggle("celda--completa", completa);
+    for (const clase of ["seleccionada", "igual", "pista", "completa"]) {
+      celda.classList.toggle(`celda--${clase}`, estado[clase]);
+    }
     celda.setAttribute("role", "gridcell");
+    celda.setAttribute("aria-selected", String(estado.seleccionada));
     celda.dataset.celda = indice;
-
-    const ficha = document.createElement("div");
-    aplicarAspecto(ficha, aspecto);
-    ficha.dataset.ficha = indice;
-    ficha.draggable = !bloqueado;
-    ficha.tabIndex = indice === this.#foco ? 0 : -1;
-    ficha.setAttribute("role", "button");
-    ficha.setAttribute("aria-pressed", String(seleccionada));
+    celda.dataset.tipo = tipo;
+    celda.draggable = !estado.bloqueado;
+    celda.tabIndex = indice === this.#foco ? 0 : -1;
     const fila = Math.floor(indice / this.#n) + 1;
     const columna = (indice % this.#n) + 1;
-    ficha.setAttribute("aria-label", `${descripcion}, fila ${fila}, columna ${columna}`);
+    celda.setAttribute("aria-label", `${nombreFicha(aspecto)}, fila ${fila}, columna ${columna}${estado.pista ? ", pista" : ""}`);
 
+    const ficha = document.createElement("span");
+    aplicarAspecto(ficha, aspecto);
     celda.append(ficha);
     return celda;
   }
 
+  #celdaEn(indice) {
+    return this.#tablero.querySelector(`[data-celda="${indice}"]`);
+  }
+
   #fichaEn(indice) {
-    return this.#tablero.querySelector(`[data-ficha="${indice}"]`);
+    return this.#celdaEn(indice).firstElementChild;
+  }
+
+  // Intro o Espacio eligen; flechas, Inicio/Fin de fila y Ctrl+Inicio/Fin del tablero mueven el foco.
+  #navegar(e) {
+    const celda = e.target.closest("[data-celda]");
+    if (!celda || e.altKey || e.metaKey) return;
+    const indice = Number(celda.dataset.celda);
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.#alElegir(indice);
+      return;
+    }
+    const n = this.#n;
+    const fila = Math.floor(indice / n);
+    const columna = indice % n;
+    const destinos = {
+      ArrowLeft: [fila, columna - 1],
+      ArrowRight: [fila, columna + 1],
+      ArrowUp: [fila - 1, columna],
+      ArrowDown: [fila + 1, columna],
+      Home: e.ctrlKey ? [0, 0] : [fila, 0],
+      End: e.ctrlKey ? [n - 1, n - 1] : [fila, n - 1],
+    };
+    if (!Object.hasOwn(destinos, e.key) || (e.ctrlKey && e.key.startsWith("Arrow"))) return;
+    e.preventDefault();
+    const [f, c] = destinos[e.key].map((valor) => Math.min(n - 1, Math.max(0, valor)));
+    this.#celdaEn(f * n + c).focus();
   }
 
   #recordarFoco(e) {
-    const ficha = e.target.closest("[data-ficha]");
-    if (!ficha) return;
-    this.#fichaEn(this.#foco)?.setAttribute("tabindex", "-1");
-    this.#foco = Number(ficha.dataset.ficha);
-    ficha.tabIndex = 0;
+    const celda = e.target.closest("[data-celda]");
+    if (!celda) return;
+    this.#celdaEn(this.#foco)?.setAttribute("tabindex", "-1");
+    this.#foco = Number(celda.dataset.celda);
+    celda.tabIndex = 0;
   }
 
-  // --- Drag & Drop: dragstart → dragover (… dragleave) → drop | dragend ---
-
   #comienzoArrastre(e) {
-    const ficha = e.target.closest?.("[data-ficha]");
-    if (!ficha) return;
-    this.#origen = ficha;
+    const celda = e.target.closest?.("[data-celda]");
+    if (!celda) return;
+    this.#origen = celda;
+    const ficha = celda.firstElementChild;
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData(FORMATO, JSON.stringify({ origen: Number(ficha.dataset.ficha) }));
+    e.dataTransfer.setData(FORMATO, JSON.stringify({ origen: Number(celda.dataset.celda) }));
+    e.dataTransfer.setDragImage(ficha, ficha.offsetWidth / 2, ficha.offsetHeight / 2);
 
-    // El navegador captura la imagen de arrastre al acabar este gestor: las clases se
-    // añaden en el siguiente fotograma para que la imagen muestre la ficha normal.
-    // el navegador toma la imagen de arrastre antes del siguiente fotograma:
-    // esperamos un tick para que no capture la ficha ya atenuada
+    // Se aplaza para que la imagen de arrastre no salga atenuada.
     setTimeout(() => {
-      if (this.#origen !== ficha) return;
-      ficha.classList.add("ficha--arrastrada");
-      ficha.parentElement.classList.add("celda--origen");
+      if (this.#origen === celda) celda.classList.add("celda--origen");
     }, 0);
   }
 
+  // dragenter y dragover: solo se acepta soltar sobre una ficha de otro tipo de este tablero.
   #sobrevolando(e) {
-    // Solo se aceptan fichas de este tablero: el arrastre tiene que haber empezado aquí
-    // (#origen) y traer nuestro formato (no textos, archivos ni datos de otras páginas).
-    if (!this.#origen || !e.dataTransfer.types.includes(FORMATO)) return;
-    const celda = e.target.closest("[data-celda]");
-    if (!celda) return this.#resaltarDestino(null);
+    const celda = e.target.closest?.("[data-celda]");
+    const valida =
+      this.#origen &&
+      e.dataTransfer.types.includes(FORMATO) &&
+      celda &&
+      celda !== this.#origen &&
+      celda.dataset.tipo !== this.#origen.dataset.tipo;
+    if (!valida) return this.#resaltarDestino(null);
 
-    e.preventDefault(); // imprescindible para que se dispare "drop"
+    e.preventDefault(); // sin esto no se dispara drop
     e.dataTransfer.dropEffect = "move";
-    this.#resaltarDestino(celda === this.#origen?.parentElement ? null : celda);
+    this.#resaltarDestino(celda);
   }
 
   #saliendo(e) {
@@ -190,11 +241,11 @@ export class VistaTablero {
   }
 
   #soltado(e) {
-    e.preventDefault(); // evita que el navegador intente abrir o navegar a lo soltado
-    const celda = e.target.closest("[data-celda]");
-    const desdeEsteTablero = this.#origen !== null;
+    e.preventDefault(); // evita que el navegador abra lo soltado
+    const celda = e.target.closest?.("[data-celda]");
+    const origen = this.#origen;
     this.#limpiarArrastre();
-    if (!desdeEsteTablero) return;
+    if (!origen || !celda) return;
 
     let datos;
     try {
@@ -202,7 +253,7 @@ export class VistaTablero {
     } catch {
       return;
     }
-    if (celda && Number.isInteger(datos?.origen)) this.#alSoltar(datos.origen, Number(celda.dataset.celda));
+    if (datos?.origen === Number(origen.dataset.celda)) this.#alSoltar(datos.origen, Number(celda.dataset.celda));
   }
 
   #resaltarDestino(celda) {
@@ -214,13 +265,12 @@ export class VistaTablero {
 
   #limpiarArrastre() {
     this.#resaltarDestino(null);
-    this.#origen?.classList.remove("ficha--arrastrada");
-    this.#origen?.parentElement?.classList.remove("celda--origen");
+    this.#origen?.classList.remove("celda--origen");
     this.#origen = null;
   }
 }
 
-// Última columna de cada fila: indica si la fila ya está completa.
+// Última columna de la fila: marca ✓ si está completa.
 function crearMarcaFila(fila, completa) {
   const marca = document.createElement("div");
   marca.className = "tablero__marca";
