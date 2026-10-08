@@ -1,0 +1,27 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Dependencias y entorno
+node_modules/
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Paquetes y comprimidos
+*.whl
+*.tar.gz
+*.zip
