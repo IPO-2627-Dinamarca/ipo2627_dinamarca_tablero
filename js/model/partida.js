@@ -1,13 +1,13 @@
-// estado del tablero: array plano de N×N, cada celda guarda un tipo (0, 1 o 2)
-export const TIPOS = 3;
+import { TIPOS } from "./constantes.js";
 
+/** Estado de la partida: array plano de N×N con el tipo de cada celda. */
 export class Partida {
   #n;
   #celdas;
-  #movimientos = 0;
+  #historial = []; // pares [a, b] intercambiados, para deshacer
 
   constructor(n) {
-    // Hace falta al menos una fila por tipo (con menos, el tablero no se puede generar).
+    // Hace falta al menos una fila por tipo para generar el tablero.
     if (!Number.isInteger(n) || n < TIPOS) throw new RangeError(`Dimensión no válida: ${n}`);
     this.#n = n;
     this.#celdas = generarTablero(n);
@@ -18,7 +18,7 @@ export class Partida {
   }
 
   get movimientos() {
-    return this.#movimientos;
+    return this.#historial.length;
   }
 
   get celdas() {
@@ -29,10 +29,16 @@ export class Partida {
     return this.filasCompletas().every(Boolean);
   }
 
+  get puedeDeshacer() {
+    return this.#historial.length > 0 && !this.terminada;
+  }
+
+  /** Tipo de la ficha en la celda indicada. */
   tipoEn(indice) {
     return this.#celdas[indice];
   }
 
+  /** Fila y columna (desde 0) de un índice. */
   posicion(indice) {
     return { fila: Math.floor(indice / this.#n), columna: indice % this.#n };
   }
@@ -41,53 +47,51 @@ export class Partida {
     return this.#esCelda(a) && this.#esCelda(b) && this.#celdas[a] === this.#celdas[b];
   }
 
+  /** Intercambia dos fichas de distinto tipo; devuelve false si el movimiento no vale. */
   intercambiar(a, b) {
     if (a === b || this.terminada || !this.#esCelda(a) || !this.#esCelda(b) || this.mismoTipo(a, b)) return false;
-    [this.#celdas[a], this.#celdas[b]] = [this.#celdas[b], this.#celdas[a]];
-    this.#movimientos++;
+    this.#cambiar(a, b);
+    this.#historial.push([a, b]);
     return true;
   }
 
+  /** Revierte el último intercambio; devuelve el par [a, b] o null si no hay nada que deshacer. */
+  deshacer() {
+    if (!this.puedeDeshacer) return null;
+    const par = this.#historial.pop();
+    this.#cambiar(...par);
+    return par;
+  }
+
+  /** Para cada fila, true si todas sus fichas son del mismo tipo. */
   filasCompletas() {
     return filasDe(this.#celdas, this.#n).map((fila) => fila.every((tipo) => tipo === fila[0]));
   }
 
-  // devuelve [a, b] o null si ya está resuelto
-  // busca primero un intercambio que coloque 2 fichas a la vez; si no hay, uno que coloque 1
+  /**
+   * Intercambio útil según el reparto óptimo de tipos por fila; prioriza el que coloca dos fichas.
+   * @returns {number[]|null} Índices [a, b], o null si ya está resuelto.
+   */
   pista() {
     if (this.terminada) return null;
 
-    const objetivo = this.#objetivoPorFila();
-    const fueraDeSitio = [...this.#celdas.keys()].filter((indice) => this.#celdas[indice] !== objetivo[this.posicion(indice).fila]);
+    const objetivo = repartoOptimo(this.#celdas, this.#n);
+    const filaDe = (indice) => this.posicion(indice).fila;
+    const fueraDeSitio = [...this.#celdas.keys()].filter((i) => this.#celdas[i] !== objetivo[filaDe(i)]);
 
     let sencilla = null;
     for (const a of fueraDeSitio) {
-      const tipoA = this.#celdas[a];
-      const filaA = this.posicion(a).fila;
       for (const b of fueraDeSitio) {
-        if (objetivo[this.posicion(b).fila] !== tipoA) continue;
-        // intercambio doble: a y b quedan los dos en su fila correcta
-        if (this.#celdas[b] === objetivo[filaA]) return [a, b];
-        // intercambio simple: al menos a queda en su fila
-        if (sencilla === null) sencilla = [a, b];
+        if (objetivo[filaDe(b)] !== this.#celdas[a]) continue;
+        if (this.#celdas[b] === objetivo[filaDe(a)]) return [a, b];
+        sencilla ??= [a, b];
       }
     }
     return sencilla;
   }
 
-  // asigna a cada fila el tipo que tiene más fichas en ella (respetando los cupos)
-  #objetivoPorFila() {
-    const filas = filasDe(this.#celdas, this.#n);
-    const cupos = contarTipos(this.#celdas).map((c) => c / this.#n);
-    return filas.map((fila) => {
-      const cuenta = contarTipos(fila);
-      let mejor = 0;
-      for (let t = 1; t < TIPOS; t++) {
-        if (cupos[t] > 0 && (cupos[mejor] === 0 || cuenta[t] > cuenta[mejor])) mejor = t;
-      }
-      cupos[mejor]--;
-      return mejor;
-    });
+  #cambiar(a, b) {
+    [this.#celdas[a], this.#celdas[b]] = [this.#celdas[b], this.#celdas[a]];
   }
 
   #esCelda(indice) {
@@ -95,8 +99,36 @@ export class Partida {
   }
 }
 
-// genera un tablero siempre resoluble: reparte las N filas entre los 3 tipos lo más
-// igualadamente posible y mezcla hasta que ninguna fila empiece ya completa
+/**
+ * Tipo que debe acabar en cada fila para dejar el máximo de fichas ya en su sitio.
+ * Programación dinámica sobre (fila, filas que le quedan a cada tipo).
+ */
+export function repartoOptimo(celdas, n) {
+  const cuentas = filasDe(celdas, n).map(contarTipos);
+  const cupos = contarTipos(celdas).map((total) => total / n);
+  const memo = new Map();
+
+  const mejor = (fila, restantes) => {
+    if (fila === n) return { colocadas: 0, tipos: [] };
+    const clave = `${fila}:${restantes}`;
+    if (memo.has(clave)) return memo.get(clave);
+
+    let resultado = null;
+    for (let tipo = 0; tipo < TIPOS; tipo++) {
+      if (restantes[tipo] === 0) continue;
+      const resto = mejor(fila + 1, restantes.with(tipo, restantes[tipo] - 1));
+      const colocadas = cuentas[fila][tipo] + resto.colocadas;
+      if (!resultado || colocadas > resultado.colocadas) resultado = { colocadas, tipos: [tipo, ...resto.tipos] };
+    }
+    memo.set(clave, resultado);
+    return resultado;
+  };
+
+  return mejor(0, cupos).tipos;
+}
+
+// Reparte las filas entre los tipos (tablero resoluble) y baraja hasta que ninguna
+// fila empiece completa.
 function generarTablero(n) {
   const filasPorTipo = Array(TIPOS).fill(Math.floor(n / TIPOS));
   barajar([...filasPorTipo.keys()])
