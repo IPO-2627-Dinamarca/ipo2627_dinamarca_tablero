@@ -1,66 +1,121 @@
-:root {
-  /* colores — interfaz monocromática (azul pizarra, distinta saturación/luz)
-     para no competir con las fichas; claro/oscuro automático con light-dark() */
-  color-scheme: light dark;
-  --matiz-interfaz: 225;
+@layer tokens, base, layout, componentes, utilidades;
 
-  --fondo: light-dark(hsl(var(--matiz-interfaz) 30% 96%), hsl(var(--matiz-interfaz) 20% 10%));
-  --superficie: light-dark(hsl(var(--matiz-interfaz) 40% 99%), hsl(var(--matiz-interfaz) 18% 15%));
-  --borde: light-dark(hsl(var(--matiz-interfaz) 20% 58%), hsl(var(--matiz-interfaz) 14% 50%)); /* ≥ 3:1 con fondo y superficie */
-  --texto: light-dark(hsl(var(--matiz-interfaz) 30% 14%), hsl(var(--matiz-interfaz) 30% 92%));
-  --texto-suave: light-dark(hsl(var(--matiz-interfaz) 12% 38%), hsl(var(--matiz-interfaz) 12% 70%));
-  --acento: light-dark(hsl(var(--matiz-interfaz) 70% 42%), hsl(var(--matiz-interfaz) 90% 74%));
-  --texto-sobre-acento: light-dark(hsl(var(--matiz-interfaz) 40% 99%), hsl(var(--matiz-interfaz) 40% 10%));
+/* Tipadas para que el navegador valide y calcule los valores que fija el JS */
+@property --n {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 3;
+}
 
-  /* Tablero siempre oscuro (figura/fondo) y ayudas muy claras sobre él. */
-  --tablero-fondo: hsl(var(--matiz-interfaz) 25% 16%);
-  --celda-fondo: hsl(var(--matiz-interfaz) 20% 23%);
-  --celda-completa: hsl(var(--matiz-interfaz) 30% 32%);
-  --ayuda: hsl(var(--matiz-interfaz) 100% 90%);
-  --ayuda-texto: hsl(var(--matiz-interfaz) 40% 12%);
-  --velo: hsl(var(--matiz-interfaz) 25% 8% / 0.85); /* capa de victoria */
+@property --celda {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
 
-  /* fichas: 6 tonos separados 60° — cambiar --matiz-fichas rota toda la rueda
-     por defecto tríada: tonos 1, 3 y 5 (rojo, verde, azul) */
-  --matiz-fichas: 355;
-  --saturacion-fichas: 75%;
-  --luz-fichas: 72%;
-  --ficha-tono-1: hsl(var(--matiz-fichas) var(--saturacion-fichas) var(--luz-fichas));
-  --ficha-tono-2: hsl(calc(var(--matiz-fichas) + 60) var(--saturacion-fichas) var(--luz-fichas));
-  --ficha-tono-3: hsl(calc(var(--matiz-fichas) + 120) var(--saturacion-fichas) var(--luz-fichas));
-  --ficha-tono-4: hsl(calc(var(--matiz-fichas) + 180) var(--saturacion-fichas) var(--luz-fichas));
-  --ficha-tono-5: hsl(calc(var(--matiz-fichas) + 240) var(--saturacion-fichas) var(--luz-fichas));
-  --ficha-tono-6: hsl(calc(var(--matiz-fichas) + 300) var(--saturacion-fichas) var(--luz-fichas));
+@layer tokens {
+  :root {
+    /* Cromático: interfaz monocromática para no competir con las fichas */
+    color-scheme: light dark;
+    --mono-matiz: 225;
 
-  /* tipografía — fuente del sistema, tamaños en escala modular (~×1.25) */
-  --fuente: system-ui, sans-serif;
+    --mono-fondo: light-dark(hsl(var(--mono-matiz) 30% 96%), hsl(var(--mono-matiz) 20% 10%));
+    --mono-superficie: light-dark(hsl(var(--mono-matiz) 40% 99%), hsl(var(--mono-matiz) 18% 15%));
+    --mono-borde: light-dark(hsl(var(--mono-matiz) 20% 58%), hsl(var(--mono-matiz) 14% 50%)); /* ≥ 3:1 con fondo y superficie */
+    --mono-texto: light-dark(hsl(var(--mono-matiz) 30% 14%), hsl(var(--mono-matiz) 30% 92%));
+    --mono-texto-suave: light-dark(hsl(var(--mono-matiz) 12% 38%), hsl(var(--mono-matiz) 12% 70%));
+    --mono-acento: light-dark(hsl(var(--mono-matiz) 70% 42%), hsl(var(--mono-matiz) 90% 74%));
+    --mono-acento-activo: light-dark(hsl(var(--mono-matiz) 70% 34%), hsl(var(--mono-matiz) 90% 82%));
+    --mono-sobre-acento: light-dark(hsl(var(--mono-matiz) 40% 99%), hsl(var(--mono-matiz) 40% 10%));
+    --mono-velo: hsl(var(--mono-matiz) 25% 8% / 0.55);
+    --mono-velo-ligero: hsl(var(--mono-matiz) 25% 8% / 0.15); /* deja ver el tablero resuelto */
 
-  --texto-pequeno: 0.8rem;
-  --texto-normal: 1rem;
-  --texto-destacado: 1.563rem;
-  --texto-titulo: 2.441rem;
+    /* Tablero siempre oscuro, ayudas claras sobre él */
+    --mono-tablero: hsl(var(--mono-matiz) 25% 16%);
+    --mono-celda: hsl(var(--mono-matiz) 20% 23%);
+    --mono-celda-completa: hsl(var(--mono-matiz) 28% 33%);
+    --mono-celda-seleccionada: hsl(var(--mono-matiz) 30% 8%); /* hundida: más oscura que el tablero */
+    --mono-celda-destino: color-mix(in oklab, var(--mono-celda), var(--mono-ayuda) 20%);
+    --mono-celda-destello: color-mix(in oklab, var(--mono-celda-completa), var(--mono-ayuda) 45%);
+    --mono-ayuda: hsl(var(--mono-matiz) 100% 90%);
+    --mono-sobre-ayuda: hsl(var(--mono-matiz) 40% 12%);
 
-  --peso-normal: 400;
-  --peso-medio: 600;
-  --peso-fuerte: 800;
+    /* Fichas: esquema hexádico, seis matices a 60°. Los tipos por defecto usan 1, 3 y 5,
+       una tríada. La forma es el canal principal; el color la refuerza. */
+    --hexa-1: hsl(355 75% 72%);
+    --hexa-2: hsl(55 75% 72%);
+    --hexa-3: hsl(115 75% 72%);
+    --hexa-4: hsl(175 75% 72%);
+    --hexa-5: hsl(235 75% 72%);
+    --hexa-6: hsl(295 75% 72%);
 
-  --interlineado-texto: 1.5;
-  --interlineado-titulo: 1.1;
-  --espaciado-mayusculas: 0.1em;
+    /* Tipografía: una fuente, escala modular de razón 1,25 */
+    --fuente: system-ui, sans-serif;
+    --razon: 1.25;
 
-  /* espaciado — escala en rem para respetar el tamaño de letra del usuario */
-  --espacio-1: 0.25rem;
-  --espacio-2: 0.5rem;
-  --espacio-3: 1rem;
-  --espacio-4: 2rem;
-  --radio: 0.5rem;
-  --anillo: 3px; /* grosor de foco, pista y selección */
-  --medida: 60ch; /* ancho máximo cómodo de lectura */
-  --ancho-pagina: 78rem;
-  --ancho-panel: minmax(16rem, 20rem);
+    --texto-pequeno: calc(1rem / var(--razon));
+    --texto-normal: 1rem;
+    --texto-destacado: calc(1rem * pow(var(--razon), 2));
+    --texto-titulo: clamp(calc(1rem * pow(var(--razon), 3)), 1rem + 4vw, calc(1rem * pow(var(--razon), 4)));
 
-  /* Lado de la celda para cada tamaño de ficha (la ficha ocupa el 76 % de la celda). */
-  --celda-pequena: 2.5rem;
-  --celda-mediana: 3.5rem;
-  --celda-grande: 4.75rem;
+    --peso-normal: 400;
+    --peso-medio: 600;
+    --peso-fuerte: 800;
+
+    --interlineado-texto: 1.5;
+    --interlineado-titulo: 1.1;
+    --espaciado-mayusculas: 0.1em;
+
+    /* Espacial: escala doble */
+    --espacio-2: 0.5rem;
+    --espacio-3: 1rem;
+    --espacio-4: 2rem;
+    --radio: 0.5rem;
+    --radio-contenedor: calc(var(--radio) + var(--espacio-3)); /* concéntrico con su contenido */
+    --anillo: 3px; /* grosor de foco, pista y selección */
+    --objetivo-minimo: 2.75rem; /* 44 px de área táctil */
+    --medida: 60ch; /* ancho de línea legible */
+    --medida-caja: 34rem; /* diálogos, y el panel cuando va en una columna */
+    --ancho-pagina: 78rem;
+    --ancho-panel: minmax(16rem, 20rem);
+
+    /* Tablero: lado de celda por tamaño y huecos proporcionales a la celda */
+    --celda-pequena: 2.75rem;
+    --celda-mediana: 3.75rem;
+    --celda-grande: 5rem;
+    --hueco-columna: 0.06;
+    --hueco-fila: 0.18; /* proximidad: las filas se separan más que las columnas */
+    --ficha-proporcion: 76%;
+    --marco-minimo: 20rem;
+    --marco-alto-minimo: 15rem; /* cabe la tarjeta de victoria */
+    --insignia: 1.4rem;
+
+    --capa-celda: 1;
+    --capa-victoria: 2;
+
+    --duracion-breve: 180ms;
+    --duracion-destello: 700ms;
+  }
+
+  /* En HSL la misma luminosidad no se percibe igual en todos los matices; en oklch sí */
+  @supports (color: oklch(0% 0 0)) {
+    :root {
+      --hexa-matiz: 25;
+      --hexa-luz: 76%;
+      --hexa-croma: 0.11;
+      --hexa-1: oklch(var(--hexa-luz) var(--hexa-croma) var(--hexa-matiz));
+      --hexa-2: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 60));
+      --hexa-3: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 120));
+      --hexa-4: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 180));
+      --hexa-5: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 240));
+      --hexa-6: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 300));
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --mono-borde: var(--mono-texto-suave);
+      --anillo: 4px;
+    }
+  }
 }
