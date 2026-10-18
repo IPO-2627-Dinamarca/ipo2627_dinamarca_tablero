@@ -70,6 +70,8 @@
       border-style: dashed;
       cursor: default;
     }
+
+    &:active:not([aria-disabled="true"]) { translate: 0 var(--hundimiento); }
   }
 
   .boton--principal {
@@ -88,6 +90,14 @@
   @media (hover: hover) {
     .boton:hover:not([aria-disabled="true"]) { border-color: var(--mono-texto); }
     .boton--principal:hover { background: var(--mono-acento-activo); border-color: var(--mono-acento-activo); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .boton,
+    .segmentado__opcion {
+      transition-property: background-color, border-color, color, translate;
+      transition-duration: var(--duracion-breve);
+    }
   }
 
   /* Barra de acciones, junto al tablero */
@@ -178,8 +188,8 @@
     font-weight: var(--peso-medio);
   }
 
-  /* Panel estrecho: forma y color apilados; los valores ya se explican solos */
-  @container panel (width < 20rem) {
+  /* Panel estrecho: forma y color apilados para que no se corten; los valores ya se explican solos */
+  @container panel (width < 22rem) {
     .aspecto__cabecera { display: none; }
     .aspecto__ficha { grid-template-columns: var(--celda-pequena) minmax(0, 1fr); }
     .aspecto__muestra { grid-row: span 2; align-self: center; }
@@ -366,6 +376,7 @@
   .ficha--tono-6 { --color-ficha: var(--hexa-6); }
 
   @media (prefers-reduced-motion: no-preference) {
+    .ficha { transition: scale var(--duracion-breve) ease-out; }
     .tablero__fila--nueva { animation: destello var(--duracion-destello) ease-out; }
   }
 
@@ -402,6 +413,17 @@
   }
 
   .victoria__record { color: var(--mono-texto-suave); }
+
+  /* Aparece con un fundido y la tarjeta sube un poco */
+  @media (prefers-reduced-motion: no-preference) {
+    .victoria { transition: opacity var(--duracion-breve) ease-out; }
+    .victoria__tarjeta { transition: translate var(--duracion-breve) ease-out; }
+
+    @starting-style {
+      .victoria { opacity: 0; }
+      .victoria__tarjeta { translate: 0 var(--espacio-2); }
+    }
+  }
 
   .victoria__titulo,
   .dialogo__titulo {
@@ -444,6 +466,7 @@
     inline-size: min(var(--medida-caja), 100% - var(--espacio-4));
     max-block-size: calc(100dvh - var(--espacio-4));
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: var(--espacio-4);
     background: var(--mono-superficie);
     color: var(--mono-texto);
@@ -456,6 +479,30 @@
   }
 
   .dialogo::backdrop { background: var(--mono-velo); }
+
+  /* Fundido de entrada y salida */
+  @media (prefers-reduced-motion: no-preference) {
+    .dialogo,
+    .dialogo::backdrop {
+      transition:
+        opacity var(--duracion-breve) ease-out,
+        translate var(--duracion-breve) ease-out,
+        overlay var(--duracion-breve) allow-discrete,
+        display var(--duracion-breve) allow-discrete;
+    }
+
+    .dialogo:not([open]),
+    .dialogo:not([open])::backdrop { opacity: 0; }
+
+    .dialogo:not([open]) { translate: 0 var(--espacio-2); }
+
+    @starting-style {
+      .dialogo[open],
+      .dialogo[open]::backdrop { opacity: 0; }
+
+      .dialogo[open] { translate: 0 var(--espacio-2); }
+    }
+  }
 
   .dialogo__cabecera {
     display: flex;
