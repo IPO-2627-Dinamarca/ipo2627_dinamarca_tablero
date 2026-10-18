@@ -3,6 +3,11 @@
     box-sizing: border-box;
   }
 
+  /* Hueco de la barra reservado: la página no se mueve cuando un diálogo la quita */
+  html {
+    scrollbar-gutter: stable both-edges;
+  }
+
   /* El fondo no se desplaza bajo un diálogo modal */
   html:has(dialog[open]) {
     overflow: hidden;
