@@ -49,7 +49,8 @@
     color: var(--mono-texto-suave);
   }
 
-  @media (width < 44rem) {
+  /* Con menos ancho, el panel dejaría al juego sin sitio para el marcador */
+  @media (width < 48rem) {
     .app {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto auto 1fr auto;

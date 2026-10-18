@@ -73,11 +73,12 @@
     --radio: 0.5rem;
     --radio-contenedor: calc(var(--radio) + var(--espacio-3)); /* concéntrico con su contenido */
     --anillo: 3px; /* grosor de foco, pista y selección */
+    --hundimiento: 1px; /* botón pulsado */
     --objetivo-minimo: 2.75rem; /* 44 px de área táctil */
     --medida: 60ch; /* ancho de línea legible */
     --medida-caja: 34rem; /* diálogos, y el panel cuando va en una columna */
     --ancho-pagina: 78rem;
-    --ancho-panel: minmax(16rem, 20rem);
+    --ancho-panel: 22rem; /* mismo valor en @container panel */
 
     /* Tablero: lado de celda por tamaño y huecos proporcionales a la celda */
     --celda-pequena: 2.75rem;
