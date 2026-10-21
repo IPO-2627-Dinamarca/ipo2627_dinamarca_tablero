@@ -2,9 +2,10 @@
   .app {
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
       "cabecera cabecera"
+      "zocalo   zocalo"
       "juego    panel"
       "pie      pie";
     gap: var(--espacio-4);
@@ -17,11 +18,9 @@
   .cabecera {
     grid-area: cabecera;
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--espacio-2) var(--espacio-3);
-    padding-block-end: var(--espacio-3);
-    border-block-end: 1px solid var(--mono-borde);
+    flex-direction: column;
+    gap: var(--espacio-2);
+    padding-block-start: var(--espacio-3);
   }
 
   /* El tablero mide sus celdas con cqi respecto a este contenedor */
@@ -40,22 +39,31 @@
     align-self: start;
   }
 
+  /* Banda de azulejo bajo la cabecera, de lado a lado de la página */
+  .zocalo {
+    grid-area: zocalo;
+    display: block;
+    inline-size: 100%;
+    block-size: clamp(6rem, 11vw, 10rem);
+    object-fit: cover;
+    object-position: 50% 60%;
+  }
+
   .pie {
     grid-area: pie;
-    padding-block-start: var(--espacio-3);
-    border-block-start: 1px solid var(--mono-borde);
-    text-align: center;
-    font-size: var(--texto-pequeno);
-    color: var(--mono-texto-suave);
+    margin-block-start: calc(var(--espacio-5) - var(--espacio-4)); /* con el gap suma --espacio-5 */
+    font-size: var(--texto-nota);
+    color: var(--comp-texto-suave);
   }
 
   /* Con menos ancho, el panel dejaría al juego sin sitio para el marcador */
   @media (width < 48rem) {
     .app {
       grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto auto auto 1fr auto;
       grid-template-areas:
         "cabecera"
+        "zocalo"
         "juego"
         "panel"
         "pie";
@@ -64,6 +72,13 @@
     .panel {
       justify-self: center;
       inline-size: min(100%, var(--medida-caja));
+    }
+
+    /* A sangre y más baja, para que el tablero siga en la primera pantalla */
+    .zocalo {
+      inline-size: calc(100% + 2 * var(--espacio-3));
+      block-size: 4.5rem;
+      margin-inline: calc(-1 * var(--espacio-3));
     }
   }
 }
