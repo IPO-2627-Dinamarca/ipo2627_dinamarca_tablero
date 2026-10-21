@@ -15,9 +15,9 @@
 
   body {
     margin: 0;
-    background: var(--mono-fondo);
-    color: var(--mono-texto);
-    font-family: var(--fuente);
+    background: var(--comp-fondo);
+    color: var(--comp-texto);
+    font-family: var(--fuente-texto);
     font-size: var(--texto-normal);
     font-weight: var(--peso-normal);
     line-height: var(--interlineado-texto);
@@ -50,8 +50,14 @@
     color: inherit;
   }
 
+  a {
+    color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+
   :focus-visible {
-    outline: var(--anillo) solid var(--mono-acento);
+    outline: var(--anillo) solid var(--comp-cobalto);
     outline-offset: 2px;
   }
 
@@ -60,9 +66,9 @@
     inset-block-start: var(--espacio-3);
     inset-inline-start: var(--espacio-3);
     padding: var(--espacio-2) var(--espacio-3);
-    background: var(--mono-superficie);
-    color: var(--mono-texto);
-    border: 1px solid var(--mono-acento);
+    background: var(--comp-cobalto);
+    color: var(--comp-sobre-cobalto);
+    border-radius: var(--radio-azulejo);
   }
 }
 
