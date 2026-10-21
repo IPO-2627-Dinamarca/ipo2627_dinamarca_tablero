@@ -5,9 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tablero · Juego de fichas</title>
   <meta name="description" content="Juego de fichas: intercambia fichas hasta que cada fila tenga un solo tipo.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tablero · Juego de fichas">
+  <meta property="og:description" content="Juego de fichas: intercambia fichas hasta que cada fila tenga un solo tipo.">
+  <meta property="og:url" content="https://ipo-2627-dinamarca.github.io/ipo2627_dinamarca_tablero/">
+  <meta property="og:image" content="https://ipo-2627-dinamarca.github.io/ipo2627_dinamarca_tablero/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f3f8">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#14171f">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f6f2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111522">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 
   <link rel="stylesheet" href="css/tokens.css">
@@ -23,17 +32,17 @@
   <div class="app">
     <header class="cabecera">
       <h1 class="cabecera__titulo">Tablero</h1>
-      <p class="cabecera__lema">Una fila, un tipo de ficha</p>
+      <p class="cabecera__lema">Una fila, un tipo de azulejo</p>
     </header>
 
     <main class="juego" id="juego">
       <h2 class="solo-lector">Juego</h2>
       <dl class="marcador">
-        <div>
+        <div class="marcador__par">
           <dt class="marcador__etiqueta">Movimientos</dt>
           <dd class="marcador__valor" data-vista="movimientos">0</dd>
         </div>
-        <div>
+        <div class="marcador__par">
           <dt class="marcador__etiqueta">Filas completas</dt>
           <dd class="marcador__valor" data-vista="filas">0</dd>
         </div>
@@ -45,7 +54,7 @@
 
         <section class="victoria" data-vista="victoria" aria-labelledby="victoria-titulo" hidden>
           <div class="victoria__tarjeta">
-            <h2 class="victoria__titulo" id="victoria-titulo">¡Tablero completado!</h2>
+            <h2 class="victoria__titulo" id="victoria-titulo">Tablero completado</h2>
             <p data-vista="resumen-victoria"></p>
             <p class="victoria__record" data-vista="record-victoria"></p>
             <button type="button" class="boton boton--principal" data-accion="revancha">Jugar otra vez</button>
@@ -140,8 +149,16 @@
       </form>
     </aside>
 
+    <img class="zocalo" src="img/zocalo-plaza-espana.jpg" width="1440" height="330"
+         alt="Zócalo de azulejos del banco de Cáceres en la Plaza de España de Sevilla: cenefas de roleos azules sobre fondo ocre y rosetas de cobalto, verde y amarillo."
+         decoding="async">
+
     <footer class="pie">
       <p>Grupo Dinamarca · IPO 2026/27</p>
+      <p>Foto del zócalo: <a href="https://commons.wikimedia.org/wiki/File:Banco_caceres_plaza_espa%C3%B1a_2018001.jpg">«Banco caceres plaza españa 2018001»</a>,
+        banco de Cáceres en la Plaza de España (Sevilla), de <a href="https://commons.wikimedia.org/wiki/User:Anual">Anual</a>
+        en Wikimedia Commons, con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es">CC BY-SA 4.0</a>.
+        Recortada a la franja inferior del banco y reducida a 1440 px de ancho.</p>
     </footer>
   </div>
 
@@ -154,7 +171,7 @@
       <ol class="dialogo__lista">
         <li><strong>Objetivo:</strong> que cada fila del tablero tenga fichas de un único tipo (misma forma y color).</li>
         <li><strong>Movimiento:</strong> intercambia dos fichas de distinto tipo, estén donde estén. Arrastra una sobre la otra, o tócalas una tras otra. Al elegir una, las de su mismo tipo se atenúan.</li>
-        <li><strong>Ayudas:</strong> la marca ✓ indica una fila completa; <em>Pista</em> marca con ⇄ un intercambio útil y <em>Deshacer</em> (Ctrl+Z) vuelve atrás el último movimiento.</li>
+        <li><strong>Ayudas:</strong> cuando una fila tiene un solo tipo se convierte en cenefa: sus azulejos se vuelven ocres, se enlazan por las esquinas y aparece ✓. <em>Pista</em> marca con ⇄ un intercambio útil y <em>Deshacer</em> (Ctrl+Z) vuelve atrás el último movimiento.</li>
         <li><strong>Siempre tiene solución:</strong> de cada tipo hay fichas justas para llenar filas enteras.</li>
         <li><strong>Ajustes:</strong> puedes cambiar la dimensión del tablero, el tamaño y el aspecto de las fichas; cada cambio empieza una partida nueva.</li>
       </ol>
