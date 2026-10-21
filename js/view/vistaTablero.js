@@ -44,7 +44,7 @@ export class VistaTablero {
     if (animar) this.#deslizar(par, antes);
   }
 
-  /** Nombre visible de una ficha, p. ej. "triángulo azul". */
+  /** Nombre visible de una ficha, p. ej. "triángulo verde". */
   nombre(aspecto) {
     return nombreFicha(aspecto);
   }

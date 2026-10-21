@@ -15,48 +15,54 @@
 
 @layer tokens {
   :root {
-    /* Cromático: interfaz monocromática para no competir con las fichas */
+    /* Cromático: interfaz complementaria cobalto (acción) / ocre melado (ayuda y logro) */
     color-scheme: light dark;
-    --mono-matiz: 225;
+    --comp-matiz: 224;
+    --comp-opuesto: calc(var(--comp-matiz) + 180);
 
-    --mono-fondo: light-dark(hsl(var(--mono-matiz) 30% 96%), hsl(var(--mono-matiz) 20% 10%));
-    --mono-superficie: light-dark(hsl(var(--mono-matiz) 40% 99%), hsl(var(--mono-matiz) 18% 15%));
-    --mono-borde: light-dark(hsl(var(--mono-matiz) 20% 58%), hsl(var(--mono-matiz) 14% 50%)); /* ≥ 3:1 con fondo y superficie */
-    --mono-texto: light-dark(hsl(var(--mono-matiz) 30% 14%), hsl(var(--mono-matiz) 30% 92%));
-    --mono-texto-suave: light-dark(hsl(var(--mono-matiz) 12% 38%), hsl(var(--mono-matiz) 12% 70%));
-    --mono-acento: light-dark(hsl(var(--mono-matiz) 70% 42%), hsl(var(--mono-matiz) 90% 74%));
-    --mono-acento-activo: light-dark(hsl(var(--mono-matiz) 70% 34%), hsl(var(--mono-matiz) 90% 82%));
-    --mono-sobre-acento: light-dark(hsl(var(--mono-matiz) 40% 99%), hsl(var(--mono-matiz) 40% 10%));
-    --mono-velo: hsl(var(--mono-matiz) 25% 8% / 0.55);
-    --mono-velo-ligero: hsl(var(--mono-matiz) 25% 8% / 0.15); /* deja ver el tablero resuelto */
+    --comp-fondo: light-dark(hsl(var(--comp-opuesto) 30% 96%), hsl(var(--comp-matiz) 34% 10%));
+    --comp-superficie: light-dark(hsl(var(--comp-opuesto) 24% 90%), hsl(var(--comp-matiz) 28% 15%));
+    --comp-texto: light-dark(hsl(var(--comp-matiz) 48% 15%), hsl(var(--comp-opuesto) 32% 93%));
+    --comp-texto-suave: light-dark(hsl(var(--comp-matiz) 18% 36%), hsl(var(--comp-opuesto) 14% 72%));
+    --comp-borde: hsl(var(--comp-matiz) 14% 52%); /* solo campos de formulario, ≥ 3:1 */
+    --comp-cobalto: light-dark(hsl(var(--comp-matiz) 62% 34%), hsl(var(--comp-matiz) 78% 74%));
+    --comp-cobalto-activo: light-dark(hsl(var(--comp-matiz) 62% 27%), hsl(var(--comp-matiz) 78% 82%));
+    --comp-sobre-cobalto: light-dark(hsl(var(--comp-opuesto) 30% 96%), hsl(var(--comp-matiz) 50% 11%));
+    --comp-melado: hsl(var(--comp-opuesto) 78% 60%);
+    --comp-velo: hsl(var(--comp-matiz) 50% 8% / 0.55);
+    --comp-velo-ligero: hsl(var(--comp-matiz) 50% 8% / 0.2); /* deja ver el tablero resuelto */
+    --comp-sombra: hsl(var(--comp-matiz) 50% 8% / 0.35); /* solo lo que flota */
 
-    /* Tablero siempre oscuro, ayudas claras sobre él */
-    --mono-tablero: hsl(var(--mono-matiz) 25% 16%);
-    --mono-celda: hsl(var(--mono-matiz) 20% 23%);
-    --mono-celda-completa: hsl(var(--mono-matiz) 28% 33%);
-    --mono-celda-seleccionada: hsl(var(--mono-matiz) 30% 8%); /* hundida: más oscura que el tablero */
-    --mono-celda-destino: color-mix(in oklab, var(--mono-celda), var(--mono-ayuda) 20%);
-    --mono-celda-destello: color-mix(in oklab, var(--mono-celda-completa), var(--mono-ayuda) 45%);
-    --mono-ayuda: hsl(var(--mono-matiz) 100% 90%);
-    --mono-sobre-ayuda: hsl(var(--mono-matiz) 40% 12%);
+    /* Tablero: paño de cobalto con azulejos claros en los dos modos */
+    --pano: light-dark(hsl(var(--comp-matiz) 52% 19%), hsl(var(--comp-matiz) 40% 22%));
+    --pano-filete: light-dark(hsl(var(--comp-matiz) 55% 32%), hsl(var(--comp-matiz) 45% 34%));
+    --azulejo: light-dark(hsl(var(--comp-opuesto) 33% 97%), hsl(var(--comp-opuesto) 20% 88%));
+    --azulejo-seleccionado: light-dark(hsl(var(--comp-matiz) 70% 90%), hsl(var(--comp-matiz) 45% 80%));
+    --azulejo-cenefa: light-dark(hsl(var(--comp-opuesto) 80% 86%), hsl(var(--comp-opuesto) 55% 78%));
+    --azulejo-lazo: light-dark(hsl(var(--comp-matiz) 60% 87%), hsl(var(--comp-matiz) 30% 77%)); /* motivo de fondo, muy por debajo de la ficha */
+    --azulejo-luz: hsl(var(--comp-opuesto) 33% 97%);
+    --tinta-azulejo: hsl(var(--comp-matiz) 62% 30%);
+    --cuerda-seca: hsl(306 25% 19%); /* contorno de manganeso de todos los motivos */
 
-    /* Fichas: esquema hexádico, seis matices a 60°. Los tipos por defecto usan 1, 3 y 5,
-       una tríada. La forma es el canal principal; el color la refuerza. */
-    --hexa-1: hsl(355 75% 72%);
-    --hexa-2: hsl(55 75% 72%);
-    --hexa-3: hsl(115 75% 72%);
-    --hexa-4: hsl(175 75% 72%);
-    --hexa-5: hsl(235 75% 72%);
-    --hexa-6: hsl(295 75% 72%);
+    /* Fichas: dos tríadas de esmaltes intercaladas a 60°, desde el cobalto de la interfaz.
+       Los tipos por defecto usan una tríada (1, 3 y 5). Cada esmalte tiene su propia luz. */
+    --triada-1: hsl(var(--comp-matiz) 53% 43%);
+    --triada-2: hsl(calc(var(--comp-matiz) + 60) 29% 35%);
+    --triada-3: hsl(calc(var(--comp-matiz) + 120) 49% 52%);
+    --triada-4: hsl(calc(var(--comp-matiz) + 180) 73% 60%);
+    --triada-5: hsl(calc(var(--comp-matiz) + 240) 33% 49%);
+    --triada-6: hsl(calc(var(--comp-matiz) + 300) 50% 52%);
 
-    /* Tipografía: una fuente, escala modular de razón 1,25 */
-    --fuente: system-ui, sans-serif;
-    --razon: 1.25;
+    /* Tipografía: dos fuentes contrastadas del sistema, escala modular de razón 4:3 */
+    --fuente-rotulo: "Iowan Old Style", "Palatino Linotype", Palatino, "URW Palladio L", P052, "Book Antiqua", serif;
+    --fuente-texto: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+    --razon: 1.333;
 
-    --texto-pequeno: calc(1rem / var(--razon));
+    --texto-nota: 0.875rem; /* solo el pie */
     --texto-normal: 1rem;
+    --texto-lema: calc(1rem * var(--razon));
     --texto-destacado: calc(1rem * pow(var(--razon), 2));
-    --texto-titulo: clamp(calc(1rem * pow(var(--razon), 3)), 1rem + 4vw, calc(1rem * pow(var(--razon), 4)));
+    --texto-titulo: clamp(calc(1rem * pow(var(--razon), 4)), 1rem + 6vw, calc(1rem * pow(var(--razon), 6)));
 
     --peso-normal: 400;
     --peso-medio: 600;
@@ -64,14 +70,17 @@
 
     --interlineado-texto: 1.5;
     --interlineado-titulo: 1.1;
-    --espaciado-mayusculas: 0.1em;
+    --interlineado-rotulo: 0.95;
+    --espaciado-rotulo: -0.02em;
 
-    /* Espacial: escala doble */
+    /* Espacial: escala doble y aristas de azulejo */
+    --espacio-1: 0.25rem;
     --espacio-2: 0.5rem;
     --espacio-3: 1rem;
     --espacio-4: 2rem;
-    --radio: 0.5rem;
-    --radio-contenedor: calc(var(--radio) + var(--espacio-3)); /* concéntrico con su contenido */
+    --espacio-5: 4rem;
+    --radio-azulejo: 0.125rem; /* celdas, botones, campos */
+    --radio-contenedor: 0.25rem; /* marco, panel, diálogos, cartela */
     --anillo: 3px; /* grosor de foco, pista y selección */
     --hundimiento: 1px; /* botón pulsado */
     --objetivo-minimo: 2.75rem; /* 44 px de área táctil */
@@ -80,7 +89,7 @@
     --ancho-pagina: 78rem;
     --ancho-panel: 22rem; /* mismo valor en @container panel */
 
-    /* Tablero: lado de celda por tamaño y huecos proporcionales a la celda */
+    /* Tablero: lado de celda por tamaño y juntas proporcionales a la celda */
     --celda-pequena: 2.75rem;
     --celda-mediana: 3.75rem;
     --celda-grande: 5rem;
@@ -95,27 +104,30 @@
     --capa-victoria: 2;
 
     --duracion-breve: 180ms;
-    --duracion-destello: 700ms;
+    --duracion-cenefa: 360ms;
+    --escalon-cenefa: 40ms;
+    --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  /* En HSL la misma luminosidad no se percibe igual en todos los matices; en oklch sí */
+  /* oklch da a cada esmalte la luz que se percibe, no la nominal de HSL.
+     265 en oklch es el mismo cobalto que 224 en HSL. */
   @supports (color: oklch(0% 0 0)) {
     :root {
-      --hexa-matiz: 25;
-      --hexa-luz: 76%;
-      --hexa-croma: 0.11;
-      --hexa-1: oklch(var(--hexa-luz) var(--hexa-croma) var(--hexa-matiz));
-      --hexa-2: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 60));
-      --hexa-3: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 120));
-      --hexa-4: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 180));
-      --hexa-5: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 240));
-      --hexa-6: oklch(var(--hexa-luz) var(--hexa-croma) calc(var(--hexa-matiz) + 300));
+      --cuerda-seca: oklch(30% 0.05 330);
+      --triada-matiz: 265;
+      --triada-1: oklch(47% 0.14 var(--triada-matiz));
+      --triada-2: oklch(45% 0.1 calc(var(--triada-matiz) + 60));
+      --triada-3: oklch(57% 0.15 calc(var(--triada-matiz) + 120));
+      --triada-4: oklch(80% 0.13 calc(var(--triada-matiz) + 180));
+      --triada-5: oklch(66% 0.14 calc(var(--triada-matiz) + 240));
+      --triada-6: oklch(72% 0.1 calc(var(--triada-matiz) + 300));
     }
   }
 
   @media (prefers-contrast: more) {
     :root {
-      --mono-borde: var(--mono-texto-suave);
+      --comp-texto-suave: var(--comp-texto);
+      --comp-borde: var(--comp-texto);
       --anillo: 4px;
     }
   }
