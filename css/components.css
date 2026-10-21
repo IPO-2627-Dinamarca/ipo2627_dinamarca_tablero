@@ -1,36 +1,35 @@
 @layer componentes {
-  /* Cabecera */
+  /* Cabecera: rótulo en serifa, como las cartelas de la Plaza de España */
   .cabecera__titulo {
+    font-family: var(--fuente-rotulo);
     font-size: var(--texto-titulo);
-    font-weight: var(--peso-fuerte);
+    font-weight: var(--peso-normal);
+    letter-spacing: var(--espaciado-rotulo);
+    line-height: var(--interlineado-rotulo);
+  }
+
+  .cabecera__lema {
+    font-size: var(--texto-lema);
     line-height: var(--interlineado-titulo);
   }
 
-  .cabecera__lema { color: var(--mono-texto-suave); }
-
-  /* Panel de ajustes */
+  /* Panel de ajustes: campo de color, sin borde */
   .panel__seccion {
     display: flex;
     flex-direction: column;
     gap: var(--espacio-3);
-    padding: var(--espacio-3);
-    background: var(--mono-superficie);
-    border: 1px solid var(--mono-borde);
+    padding: var(--espacio-4) var(--espacio-3);
+    background: var(--comp-superficie);
     border-radius: var(--radio-contenedor);
   }
 
-  .panel__titulo {
+  .panel__titulo,
+  .victoria__titulo,
+  .dialogo__titulo {
+    font-family: var(--fuente-rotulo);
     font-size: var(--texto-destacado);
-    font-weight: var(--peso-fuerte);
+    font-weight: var(--peso-medio);
     line-height: var(--interlineado-titulo);
-  }
-
-  .marcador__etiqueta {
-    font-size: var(--texto-pequeno);
-    font-weight: var(--peso-fuerte);
-    letter-spacing: var(--espaciado-mayusculas);
-    text-transform: uppercase;
-    color: var(--mono-texto-suave);
   }
 
   .campo,
@@ -43,31 +42,27 @@
     gap: var(--espacio-2);
   }
 
-  .nota,
-  .instrucciones {
-    font-size: var(--texto-pequeno);
-    color: var(--mono-texto-suave);
-  }
+  .nota { color: var(--comp-texto-suave); }
 
   /* Botones y desplegables */
   .boton,
   .campo__control {
     min-block-size: var(--objetivo-minimo);
     padding: var(--espacio-2);
-    background: var(--mono-superficie);
-    border: 1px solid var(--mono-borde);
-    border-radius: var(--radio);
+    border-radius: var(--radio-azulejo);
   }
 
   .boton {
     padding-inline: var(--espacio-3);
+    background: var(--comp-superficie);
+    border: 0;
     font-weight: var(--peso-medio);
     cursor: pointer;
     touch-action: manipulation;
 
     &[aria-disabled="true"] {
-      color: var(--mono-texto-suave);
-      border-style: dashed;
+      background: transparent;
+      color: var(--comp-texto-suave);
       cursor: default;
     }
 
@@ -75,27 +70,28 @@
   }
 
   .boton--principal {
-    background: var(--mono-acento);
-    border-color: var(--mono-acento);
-    color: var(--mono-sobre-acento);
+    background: var(--comp-cobalto);
+    color: var(--comp-sobre-cobalto);
 
-    &:active { background: var(--mono-acento-activo); }
+    &:active { background: var(--comp-cobalto-activo); }
   }
 
   .boton--icono {
     min-inline-size: var(--objetivo-minimo);
     padding-inline: 0;
+    background: transparent;
   }
 
   @media (hover: hover) {
-    .boton:hover:not([aria-disabled="true"]) { border-color: var(--mono-texto); }
-    .boton--principal:hover { background: var(--mono-acento-activo); border-color: var(--mono-acento-activo); }
+    .boton:hover:where(:not([aria-disabled="true"])) { background: color-mix(in oklab, var(--comp-superficie), var(--comp-texto) 8%); }
+    .boton--icono:hover { background: var(--comp-superficie); }
+    .boton--principal:hover { background: var(--comp-cobalto-activo); }
   }
 
   @media (prefers-reduced-motion: no-preference) {
     .boton,
     .segmentado__opcion {
-      transition-property: background-color, border-color, color, translate;
+      transition-property: background-color, color, translate;
       transition-duration: var(--duracion-breve);
     }
   }
@@ -121,56 +117,61 @@
 
     .acciones .boton {
       padding-inline: var(--espacio-2);
-      font-size: clamp(var(--texto-pequeno), 4.6cqi, var(--texto-normal));
+      font-size: clamp(var(--texto-nota), 4.6cqi, var(--texto-normal));
     }
   }
 
   /* Formulario */
   .campo__etiqueta,
-  .grupo__leyenda {
-    font-size: var(--texto-pequeno);
+  .grupo__leyenda,
+  .aspecto__cabecera {
     font-weight: var(--peso-medio);
   }
 
   /* legend queda fuera del gap del fieldset */
   .grupo__leyenda { padding-block-end: var(--espacio-2); }
 
-  .campo__control { inline-size: 100%; }
+  /* Única caja con borde fino: un campo tiene que leerse como campo */
+  .campo__control {
+    inline-size: 100%;
+    padding-inline-end: var(--espacio-1); /* la flecha ya separa el texto del borde */
+    background: var(--comp-fondo);
+    border: 1px solid var(--comp-borde);
+  }
 
-  /* Control segmentado: radios ocultos, la etiqueta hace de botón */
-  .segmentado { display: flex; }
+  /* Control segmentado: tres azulejos con junta; la etiqueta hace de botón */
+  .segmentado {
+    display: flex;
+    gap: var(--espacio-1);
+  }
 
+  /* Base cero y letra que sigue al ancho del panel: las tres caben en un móvil de 320 px */
   .segmentado__opcion {
-    flex: 1;
+    flex: 1 1 0;
+    min-inline-size: 0;
     display: grid;
     place-items: center;
     min-block-size: var(--objetivo-minimo);
-    padding-inline: var(--espacio-2);
-    background: var(--mono-superficie);
-    border: 1px solid var(--mono-borde);
+    padding-inline: var(--espacio-1);
+    font-size: clamp(var(--texto-nota), 5.4cqi, var(--texto-normal));
+    background: var(--comp-fondo);
+    border-radius: var(--radio-azulejo);
     cursor: pointer;
 
     &:has(:checked) {
-      background: var(--mono-acento);
-      border-color: var(--mono-acento);
-      color: var(--mono-sobre-acento);
+      background: var(--comp-cobalto);
+      color: var(--comp-sobre-cobalto);
       font-weight: var(--peso-medio);
     }
 
     &:has(:focus-visible) {
-      z-index: 1;
-      outline: var(--anillo) solid var(--mono-acento);
+      outline: var(--anillo) solid var(--comp-cobalto);
       outline-offset: 2px;
     }
   }
 
-  /* Bordes compartidos y esquinas redondeadas solo en los extremos */
-  .segmentado__opcion + .segmentado__opcion { margin-inline-start: -1px; }
-  .segmentado__opcion:first-child { border-start-start-radius: var(--radio); border-end-start-radius: var(--radio); }
-  .segmentado__opcion:last-child { border-start-end-radius: var(--radio); border-end-end-radius: var(--radio); }
-
   @media (hover: hover) {
-    .segmentado__opcion:hover:not(:has(:checked)) { border-color: var(--mono-texto); z-index: 1; }
+    .segmentado__opcion:hover:not(:has(:checked)) { background: color-mix(in oklab, var(--comp-fondo), var(--comp-texto) 8%); }
   }
 
   .aspecto__cabecera,
@@ -181,13 +182,6 @@
     gap: var(--espacio-2);
   }
 
-  /* Rótulos de columna una sola vez; cada desplegable conserva su label */
-  .aspecto__cabecera {
-    align-items: end;
-    font-size: var(--texto-pequeno);
-    font-weight: var(--peso-medio);
-  }
-
   /* Panel estrecho: forma y color apilados para que no se corten; los valores ya se explican solos */
   @container panel (width < 22rem) {
     .aspecto__cabecera { display: none; }
@@ -195,51 +189,82 @@
     .aspecto__muestra { grid-row: span 2; align-self: center; }
   }
 
+  /* Muestra: un azulejo con la junta del paño */
   .aspecto__muestra {
+    --vidriado: var(--azulejo);
     display: grid;
     place-items: center;
     aspect-ratio: 1;
-    background: var(--mono-celda);
-    border-radius: var(--radio);
+    background: var(--vidriado);
+    border-radius: var(--radio-azulejo);
+    outline: 0.1875rem solid var(--pano);
   }
 
-  /* Marcador */
+  /* Marcador: cifra delante de la palabra, "12 movimientos" */
   .marcador {
     display: flex;
-    gap: var(--espacio-4);
-    text-align: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--espacio-2) var(--espacio-4);
+  }
+
+  @container juego (width < 34rem) {
+    .marcador { column-gap: var(--espacio-3); }
+  }
+
+  .marcador__par {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35em;
+  }
+
+  .marcador__etiqueta {
+    color: var(--comp-texto-suave);
+    text-transform: lowercase;
   }
 
   .marcador__valor {
+    order: -1;
+    font-family: var(--fuente-rotulo);
     font-size: var(--texto-destacado);
-    font-weight: var(--peso-fuerte);
-    font-variant-numeric: tabular-nums;
+    font-weight: var(--peso-medio);
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: var(--interlineado-titulo);
   }
 
-  /* Tablero */
+  /* Tablero: el paño, cuyo fondo se ve por las juntas */
   .marco {
     position: relative; /* referencia de la capa de victoria */
     isolation: isolate;
     display: grid;
     place-items: center;
     min-inline-size: min(var(--marco-minimo), 100%);
+    --relleno-marco: var(--espacio-3);
+    --media: 0.5; /* ancho de las medias columnas, en celdas */
     min-block-size: var(--marco-alto-minimo);
-    padding: var(--espacio-3);
-    background: var(--mono-tablero);
-    border: 1px solid var(--mono-borde); /* región común, también en modo oscuro */
+    padding: var(--relleno-marco);
+    background: var(--pano);
     border-radius: var(--radio-contenedor);
+  }
+
+  /* Estrecho: menos relleno y medias columnas más finas para que las fichas crezcan */
+  @container juego (width < 26rem) {
+    .marco {
+      --relleno-marco: var(--espacio-2);
+      --media: 0.35;
+    }
   }
 
   /* N columnas entre dos medias: la de la marca ✓ y su espejo, que mantiene las fichas
      centradas. La celda es la del tamaño elegido salvo que no quepa en el ancho:
-     N + 1 celdas y N + 1 huecos. */
+     N celdas, dos medias y N + 1 huecos. */
   .tablero {
     --celda: min(
       var(--celda-tamano),
-      (100cqi - 2 * var(--espacio-3) - 2px) / ((var(--n) + 1) * (1 + var(--hueco-columna)))
+      (100cqi - 2 * var(--relleno-marco)) / (var(--n) + 2 * var(--media) + (var(--n) + 1) * var(--hueco-columna))
     );
     display: grid;
-    grid-template-columns: calc(var(--celda) / 2) repeat(var(--n), var(--celda)) calc(var(--celda) / 2);
+    grid-template-columns: calc(var(--celda) * var(--media)) repeat(var(--n), var(--celda)) calc(var(--celda) * var(--media));
     grid-auto-rows: var(--celda);
     gap: calc(var(--celda) * var(--hueco-fila)) calc(var(--celda) * var(--hueco-columna));
   }
@@ -253,38 +278,47 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
-    border-radius: var(--radio);
+    border-radius: var(--radio-azulejo);
   }
 
   /* Ocupa la media columna espejo de la marca */
   .tablero__fila::before { content: ""; }
 
-  /* Fila completa: una sola franja continua (región común) */
+  /* Fila completa: un filete continuo sobre el paño (región común) */
   .tablero__fila--completa {
-    background: var(--mono-celda-completa);
-    box-shadow: 0 0 0 calc(var(--celda) * var(--hueco-columna)) var(--mono-celda-completa);
+    background: var(--pano-filete);
+    box-shadow: 0 0 0 calc(var(--celda) * var(--hueco-columna)) var(--pano-filete);
   }
 
   .tablero__marca {
     display: grid;
     place-items: center;
-    color: var(--mono-ayuda);
+    color: var(--comp-melado);
     font-size: calc(var(--celda) * 0.4);
     font-weight: var(--peso-fuerte);
   }
 
-  /* Celda: toda ella es la zona pulsable y arrastrable */
+  /* Celda: un azulejo; toda ella es la zona pulsable y arrastrable.
+     El lazo pinta un cuarto de roseta pálido en cada esquina, que se completa con las vecinas. */
   .celda {
+    --vidriado: var(--azulejo);
     --anillo-dentro: 0px;
     --anillo-fuera: 0px;
-    position: relative; /* referencia de la insignia ⇄ */
+    --lazo: var(--azulejo-lazo) calc(var(--celda) * 0.07), transparent 0 calc(var(--celda) * 0.11),
+      var(--azulejo-lazo) 0 calc(var(--celda) * 0.17), transparent 0;
+    position: relative; /* referencia de la insignia ⇄ y de las esquinas de cenefa */
     display: grid;
     place-items: center;
-    background: var(--mono-celda);
-    border-radius: var(--radio);
+    background-color: var(--vidriado);
+    background-image:
+      radial-gradient(circle at 0 0, var(--lazo)),
+      radial-gradient(circle at 100% 0, var(--lazo)),
+      radial-gradient(circle at 0 100%, var(--lazo)),
+      radial-gradient(circle at 100% 100%, var(--lazo));
+    border-radius: var(--radio-azulejo);
     box-shadow:
-      inset 0 0 0 var(--anillo-dentro) var(--mono-ayuda),
-      0 0 0 var(--anillo-fuera) var(--mono-ayuda);
+      inset 0 0 0 var(--anillo-dentro) var(--tinta-azulejo),
+      0 0 0 var(--anillo-fuera) var(--comp-melado);
     cursor: pointer;
     user-select: none;
     touch-action: manipulation;
@@ -293,10 +327,14 @@
 
     &:focus-visible {
       z-index: var(--capa-celda);
-      outline-color: var(--mono-ayuda);
+      outline-color: var(--azulejo-luz);
     }
 
-    &.celda--completa { background: transparent; }
+    /* La cenefa sustituye al lazo por sus esquinas de cobalto */
+    &.celda--completa {
+      --vidriado: var(--azulejo-cenefa);
+      background-image: none;
+    }
 
     &.celda--pista,
     &.celda--destino {
@@ -304,25 +342,39 @@
       z-index: var(--capa-celda);
     }
 
-    &.celda--destino { background: var(--mono-celda-destino); }
-
+    /* La selección manda sobre el vidriado de la cenefa */
     &.celda--seleccionada {
+      --vidriado: var(--azulejo-seleccionado);
       --anillo-dentro: var(--anillo);
       --escala: 1.15;
-      background: var(--mono-celda-seleccionada);
     }
 
     /* Por encima de las vecinas mientras su ficha se desliza */
     &.celda--viaje { z-index: var(--capa-celda); }
 
     &.celda--origen {
-      outline: 2px dashed var(--mono-ayuda);
+      outline: 2px dashed var(--tinta-azulejo);
       outline-offset: calc(-2 * var(--anillo));
     }
   }
 
   @media (hover: hover) {
     .celda:hover:not(.celda--seleccionada) { --escala: 1.08; }
+  }
+
+  /* Cenefa: cuartos de círculo en las esquinas que se enlazan con los de la pieza vecina */
+  .celda--completa::before {
+    --r: calc(var(--celda) * 0.14);
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 0 0, var(--tinta-azulejo) var(--r), transparent calc(var(--r) + 0.5px)),
+      radial-gradient(circle at 100% 0, var(--tinta-azulejo) var(--r), transparent calc(var(--r) + 0.5px)),
+      radial-gradient(circle at 0 100%, var(--tinta-azulejo) var(--r), transparent calc(var(--r) + 0.5px)),
+      radial-gradient(circle at 100% 100%, var(--tinta-azulejo) var(--r), transparent calc(var(--r) + 0.5px));
+    pointer-events: none;
   }
 
   /* Insignia ⇄: sobresale de la esquina para no tapar la ficha */
@@ -336,22 +388,54 @@
     place-items: center;
     inline-size: min(var(--insignia), calc(var(--celda) * 0.45));
     aspect-ratio: 1;
-    background: var(--mono-ayuda);
-    color: var(--mono-sobre-ayuda);
+    background: var(--comp-melado);
+    color: var(--pano);
     border-radius: 50%;
-    font-size: min(var(--texto-pequeno), calc(var(--celda) * 0.3));
+    box-shadow: 0 0 0 2px var(--pano);
+    font-size: min(var(--texto-nota), calc(var(--celda) * 0.3));
     font-weight: var(--peso-fuerte);
     line-height: 1;
     pointer-events: none;
   }
 
-  /* Ficha: solo dibuja la forma; los eventos van a la celda */
+  /* Ficha: motivo en tres capas recortadas con la misma silueta (--motivo):
+     contorno de cuerda seca, esmalte y "ojo" del color del vidriado.
+     El esmalte se escala desde el incentro para que el contorno sea uniforme. */
   .ficha {
+    --cuerda: 7; /* % del lado */
+    --apotema: 50;
+    --ojo: 0.28;
+    --centro: 50% 50%;
+    position: relative; /* por encima de las esquinas de cenefa */
     inline-size: var(--ficha-proporcion);
     aspect-ratio: 1;
-    background: var(--color-ficha);
+    background: var(--cuerda-seca);
+    clip-path: var(--motivo);
     scale: var(--escala, 1);
     pointer-events: none;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      clip-path: var(--motivo);
+      transform-origin: var(--centro);
+    }
+
+    &::before {
+      background: var(--color-ficha);
+      scale: calc(1 - var(--cuerda) / var(--apotema));
+    }
+
+    &::after {
+      background: var(--vidriado);
+      scale: var(--ojo);
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .ficha { --cuerda: 10; }
   }
 
   .celda--igual .ficha,
@@ -361,29 +445,55 @@
 
   .ficha--muestra { inline-size: 70%; }
 
-  .ficha--circulo { border-radius: 50%; }
-  .ficha--cuadrado { border-radius: 12%; }
-  .ficha--triangulo { clip-path: polygon(50% 4%, 98% 92%, 2% 92%); }
-  .ficha--rombo { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-  .ficha--hexagono { clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); }
-  .ficha--estrella { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 71%, 21% 92%, 32% 57%, 2% 35%, 39% 35%); }
+  .ficha--circulo { --motivo: circle(50%); }
+  .ficha--cuadrado { --motivo: inset(0 round 12%); }
 
-  .ficha--tono-1 { --color-ficha: var(--hexa-1); }
-  .ficha--tono-2 { --color-ficha: var(--hexa-2); }
-  .ficha--tono-3 { --color-ficha: var(--hexa-3); }
-  .ficha--tono-4 { --color-ficha: var(--hexa-4); }
-  .ficha--tono-5 { --color-ficha: var(--hexa-5); }
-  .ficha--tono-6 { --color-ficha: var(--hexa-6); }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .ficha { transition: scale var(--duracion-breve) ease-out; }
-    .tablero__fila--nueva { animation: destello var(--duracion-destello) ease-out; }
+  .ficha--triangulo {
+    --motivo: polygon(50% 4%, 98% 92%, 2% 92%);
+    --apotema: 28.5;
+    --centro: 50% 63.5%;
   }
 
-  @keyframes destello {
+  .ficha--rombo {
+    --motivo: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    --apotema: 35.36;
+  }
+
+  .ficha--hexagono {
+    --motivo: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
+    --apotema: 43.5;
+  }
+
+  /* Estrella de lazo de ocho puntas, radio interior al 55 % */
+  .ficha--estrella {
+    --motivo: polygon(50% 0%, 60.5% 24.6%, 85.4% 14.6%, 75.4% 39.5%, 100% 50%, 75.4% 60.5%, 85.4% 85.4%,
+      60.5% 75.4%, 50% 100%, 39.5% 75.4%, 14.6% 85.4%, 24.6% 60.5%, 0% 50%, 24.6% 39.5%, 14.6% 14.6%, 39.5% 24.6%);
+    --apotema: 19.67;
+    --ojo: 0.3;
+  }
+
+  .ficha--tono-1 { --color-ficha: var(--triada-1); }
+  .ficha--tono-2 { --color-ficha: var(--triada-2); }
+  .ficha--tono-3 { --color-ficha: var(--triada-3); }
+  .ficha--tono-4 { --color-ficha: var(--triada-4); }
+  .ficha--tono-5 { --color-ficha: var(--triada-5); }
+  .ficha--tono-6 { --color-ficha: var(--triada-6); }
+
+  /* Fila recién completada: las esquinas aparecen de izquierda a derecha.
+     sibling-index() va aparte: sin soporte, la cenefa aparece entera. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ficha { transition: scale var(--duracion-breve) var(--curva); }
+
+    .tablero__fila--nueva .celda::before {
+      animation: cenefa var(--duracion-cenefa) var(--curva) both;
+      animation-delay: calc((sibling-index() - 1) * var(--escalon-cenefa));
+    }
+  }
+
+  @keyframes cenefa {
     from {
-      background-color: var(--mono-celda-destello);
-      box-shadow: 0 0 0 calc(var(--celda) * var(--hueco-fila)) var(--mono-celda-destello);
+      opacity: 0;
+      scale: 0.6;
     }
   }
 
@@ -395,8 +505,18 @@
     display: grid;
     place-items: center;
     padding: var(--espacio-2);
-    background: var(--mono-velo-ligero);
+    background: var(--comp-velo-ligero);
     border-radius: inherit;
+  }
+
+  /* Cartela: campo claro con marco grueso de cobalto */
+  .victoria__tarjeta,
+  .dialogo {
+    background: var(--comp-fondo);
+    color: var(--comp-texto);
+    border: 0.375rem solid var(--comp-cobalto);
+    border-radius: var(--radio-contenedor);
+    box-shadow: 0 1.5rem 3rem var(--comp-sombra);
   }
 
   .victoria__tarjeta {
@@ -405,14 +525,10 @@
     align-items: center;
     gap: var(--espacio-2);
     padding: var(--espacio-3);
-    background: var(--mono-superficie);
-    color: var(--mono-texto);
-    border: 1px solid var(--mono-borde);
-    border-radius: var(--radio-contenedor);
     text-align: center;
   }
 
-  .victoria__record { color: var(--mono-texto-suave); }
+  .victoria__record { color: var(--comp-texto-suave); }
 
   /* Aparece con un fundido y la tarjeta sube un poco */
   @media (prefers-reduced-motion: no-preference) {
@@ -423,13 +539,6 @@
       .victoria { opacity: 0; }
       .victoria__tarjeta { translate: 0 var(--espacio-2); }
     }
-  }
-
-  .victoria__titulo,
-  .dialogo__titulo {
-    font-size: var(--texto-destacado);
-    font-weight: var(--peso-fuerte);
-    line-height: var(--interlineado-titulo);
   }
 
   /* Mensajes */
@@ -468,17 +577,13 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: var(--espacio-4);
-    background: var(--mono-superficie);
-    color: var(--mono-texto);
-    border: 1px solid var(--mono-borde);
-    border-radius: var(--radio-contenedor);
   }
 
   @media (width < 30rem) {
     .dialogo { padding: var(--espacio-3); }
   }
 
-  .dialogo::backdrop { background: var(--mono-velo); }
+  .dialogo::backdrop { background: var(--comp-velo); }
 
   /* Fundido de entrada y salida */
   @media (prefers-reduced-motion: no-preference) {
@@ -522,11 +627,17 @@
     gap: var(--espacio-2);
   }
 
-  /* Alto contraste: el color de las fichas y la opción marcada son información */
+  /* Alto contraste: el color de las fichas y la opción marcada son información;
+     sin borde propio, botones y opciones necesitan uno del sistema */
   @media (forced-colors: active) {
     .marco,
     .aspecto__muestra {
       forced-color-adjust: none;
+    }
+
+    .boton:not(.boton--icono),
+    .segmentado__opcion {
+      border: 2px solid ButtonText;
     }
 
     .segmentado__opcion:has(:checked) {
