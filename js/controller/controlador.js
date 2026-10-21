@@ -221,7 +221,7 @@ export class Controlador {
     this.#controles.mostrarConfiguracion({ dimension, tamano, aspecto });
   }
 
-  // P. ej. "círculo rojo (fila 2, columna 3)".
+  // P. ej. "círculo cobalto (fila 2, columna 3)".
   #describir(indice) {
     const { fila, columna } = this.#partida.posicion(indice);
     const tipo = this.#partida.tipoEn(indice);
