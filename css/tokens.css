@@ -58,7 +58,7 @@
     --fuente-texto: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
     --razon: 1.333;
 
-    --texto-nota: 0.875rem; /* solo el pie */
+    --texto-nota: 0.875rem; /* notas y crédito */
     --texto-normal: 1rem;
     --texto-lema: calc(1rem * var(--razon));
     --texto-destacado: calc(1rem * pow(var(--razon), 2));
@@ -78,7 +78,6 @@
     --espacio-2: 0.5rem;
     --espacio-3: 1rem;
     --espacio-4: 2rem;
-    --espacio-5: 4rem;
     --radio-azulejo: 0.125rem; /* celdas, botones, campos */
     --radio-contenedor: 0.25rem; /* marco, panel, diálogos, cartela */
     --anillo: 3px; /* grosor de foco, pista y selección */

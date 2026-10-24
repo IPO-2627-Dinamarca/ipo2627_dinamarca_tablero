@@ -2,12 +2,11 @@
   .app {
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
       "cabecera cabecera"
       "zocalo   zocalo"
-      "juego    panel"
-      "pie      pie";
+      "juego    panel";
     gap: var(--espacio-4);
     max-inline-size: var(--ancho-pagina);
     min-block-size: 100svh;
@@ -49,24 +48,16 @@
     object-position: 50% 60%;
   }
 
-  .pie {
-    grid-area: pie;
-    margin-block-start: calc(var(--espacio-5) - var(--espacio-4)); /* con el gap suma --espacio-5 */
-    font-size: var(--texto-nota);
-    color: var(--comp-texto-suave);
-  }
-
   /* Con menos ancho, el panel dejaría al juego sin sitio para el marcador */
   @media (width < 48rem) {
     .app {
       grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto auto auto 1fr auto;
+      grid-template-rows: auto auto auto 1fr;
       grid-template-areas:
         "cabecera"
         "zocalo"
         "juego"
-        "panel"
-        "pie";
+        "panel";
     }
 
     .panel {

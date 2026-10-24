@@ -73,6 +73,7 @@ index.html                estructura de la página y los dos diálogos
 DESIGN.md                 dirección de arte: concepto, color, tipografía, espacio y componentes
 img/
   favicon.svg             icono: paño con tres filas de azulejos, cada una de un tipo
+  captura.jpg, og.png     captura del README y vista previa al compartir el enlace
   zocalo-plaza-espana.jpg zócalo de la Plaza de España, foto con licencia CC BY-SA 4.0
 css/
   tokens.css              orden de capas, propiedades registradas y variables (cromático, tipográfico, espacial)
@@ -140,7 +141,7 @@ El tablero es un paño oscuro con piezas claras en los dos modos, porque así es
 
 Dos fuentes contrastadas, las dos del sistema y con una pila de respaldo, para no descargar nada. Los rótulos (el título, «Ajustes», los títulos de los diálogos y de la victoria y las cifras del marcador) van en una serifa antigua, como la letra de las cartelas de la Plaza de España: Iowan Old Style, Palatino o sus clones libres (URW Palladio, P052). Ninguna de ellas está en todos los sistemas; por eso la pila acaba en la serifa genérica, y el diseño aguanta con cualquiera. Todo lo demás va en la palo seco del sistema. La serifa da el carácter y la palo seco se lee mejor a tamaño pequeño; el contraste entre las dos marca la jerarquía.
 
-Los tamaños salen de una escala modular de razón 4:3 (`--razon: 1.333`) calculada con `pow()`, y en toda la página solo hay cinco: 14 px para el pie, 16 px para todo el texto, 21 px para el lema, 28 px para los rótulos medianos y un título fluido con `clamp()` que va de 51 a 90 px. La única excepción es la ✓ de las filas completas, que se mide con la celda (`calc(var(--celda) * 0.4)`) y no con la escala, para que crezca y mengüe con el tablero. No hay etiquetas en mayúsculas espaciadas: el marcador pone la cifra delante de la palabra («12 movimientos»), con cifras tabulares para que no bailen. También hay `text-wrap: balance` en los títulos, `pretty` en los párrafos y unos 60 caracteres como ancho máximo de lectura.
+Los tamaños salen de una escala modular de razón 4:3 (`--razon: 1.333`) calculada con `pow()`, y en toda la página solo hay cinco: 14 px para las notas, 16 px para todo el texto, 21 px para el lema, 28 px para los rótulos medianos y un título fluido con `clamp()` que va de 51 a 90 px. La única excepción es la ✓ de las filas completas, que se mide con la celda (`calc(var(--celda) * 0.4)`) y no con la escala, para que crezca y mengüe con el tablero. No hay etiquetas en mayúsculas espaciadas: el marcador pone la cifra delante de la palabra («12 movimientos»), con cifras tabulares para que no bailen. También hay `text-wrap: balance` en los títulos, `pretty` en los párrafos y unos 60 caracteres como ancho máximo de lectura.
 
 ### Espacial
 
@@ -185,8 +186,8 @@ Botones y controles miden al menos 44 px de alto para poder pulsarlos con el ded
 
 ## Buenas prácticas
 
-- HTML semántico: `header`, `main` (con un `h2` solo para lectores de pantalla), `aside` para los ajustes y `footer`; un único `h1`; los ajustes en un `form` con `fieldset`, `legend` y `label`; el marcador como lista de definiciones; dos `dialog`; `theme-color` para modo claro y oscuro y un favicon SVG propio.
-- Imagen: la foto del zócalo lleva `width` y `height`, así que el navegador le reserva el sitio y la página no salta al cargarla, `decoding="async"` y un `alt` que describe lo que se ve. El crédito y la licencia están en el pie.
+- HTML semántico: `header`, `main` (con un `h2` solo para lectores de pantalla), `aside` para los ajustes; un único `h1`; los ajustes en un `form` con `fieldset`, `legend` y `label`; el marcador como lista de definiciones; dos `dialog`; `theme-color` para modo claro y oscuro y un favicon SVG propio.
+- Imagen: la foto del zócalo lleva `width` y `height`, así que el navegador le reserva el sitio y la página no salta al cargarla, `decoding="async"` y un `alt` que describe lo que se ve. El crédito y la licencia están al final del diálogo de ayuda.
 - JS y DOM: las vistas localizan los elementos por `data-vista`, `data-control`, `data-accion`, `data-celda` y `data-tipo` (las clases quedan para el estilo), y atienden los eventos por delegación en el tablero, el formulario y la barra de acciones.
 - JS y estilos: el JS no escribe estilos sueltos. Solo fija `--n`, cambia clases modificadoras y lanza la animación del intercambio; colores y medidas vienen del CSS.
 
