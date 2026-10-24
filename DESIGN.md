@@ -47,7 +47,7 @@ Sale de aplicar `redesign-existing-projects` y las reglas de `design-taste-front
 
 | Problema actual | Dónde | Sustitución |
 |---|---|---|
-| Línea fina bajo la cabecera y sobre el pie | `layout.css`, `.cabecera` y `.pie` con `border-block-*: 1px` | Espacio y cambio de escala; el pie se separa con `--espacio-4` |
+| Línea fina bajo la cabecera | `layout.css`, `.cabecera` con `border-block-*: 1px` | Espacio y cambio de escala |
 | Panel como tarjeta blanca con borde de 1 px | `.panel__seccion` | Campo de color `--comp-superficie` sin borde (escalón de tono) |
 | Etiquetas en mayúsculas espaciadas ("MOVIMIENTOS") | `.marcador__etiqueta` | Cifra grande seguida de la palabra en minúscula: "12 movimientos" |
 | Instrucciones y notas a 12,8 px en gris | `.nota`, `.instrucciones` | 16 px; instrucciones en tinta plena y notas en `--comp-texto-suave` (≥ 6:1) |
@@ -208,7 +208,7 @@ Escala modular de razón 4:3 (`--razon: 1.333`, cuarta justa), calculada con `po
 
 | Token | Valor | ≈ px | Uso |
 |---|---|---|---|
-| `--texto-nota` | `0.875rem` | 14 | Solo el pie (grupo y crédito de la foto) |
+| `--texto-nota` | `0.875rem` | 14 | Notas y crédito de la foto |
 | `--texto-normal` | `1rem` | 16 | Todo el texto corrido, notas del panel, botones, instrucciones |
 | `--texto-lema` | `calc(1rem * var(--razon))` | 21 | Lema de la cabecera |
 | `--texto-destacado` | `calc(1rem * pow(var(--razon), 2))` | 28 | Cifras del marcador, "Ajustes", títulos de diálogos y victoria |
@@ -234,7 +234,7 @@ La ✓ y la ⇄ se dimensionan con la celda (`--celda`) y no cuentan en la escal
 ### 5.1 Unidades y escala
 
 - `rem` para todo lo tipográfico y de interfaz; `cqi` para ajustar la celda al ancho del contenedor; `%` dentro de la ficha.
-- Escala doble de espaciado, la de ahora más un paso por arriba: `--espacio-2: 0.5rem`, `--espacio-3: 1rem`, `--espacio-4: 2rem`, `--espacio-5: 4rem` (separación entre el contenido y el pie). Se añade `--espacio-1: 0.25rem` para las juntas del control segmentado.
+- Escala doble de espaciado, la de ahora: `--espacio-2: 0.5rem`, `--espacio-3: 1rem`, `--espacio-4: 2rem`. Se añade `--espacio-1: 0.25rem` para las juntas del control segmentado.
 - **Radios.** Se abandona el radio concéntrico (8 + 16 px) porque redondeaba demasiado. Un azulejo tiene la arista casi viva: `--radio-azulejo: 0.125rem` (2 px) en celdas, botones, campos y segmentado; `--radio-contenedor: 0.25rem` (4 px) en el marco, el panel, los diálogos y la cartela de victoria. La foto va sin redondear.
 - Se mantienen `--objetivo-minimo: 2.75rem`, `--medida: 60ch`, `--medida-caja: 34rem`, `--ancho-pagina: 78rem` y `--ancho-panel: 22rem`.
 
@@ -438,10 +438,10 @@ Una ficha ocre sobre vidriado de cenefa apenas contrasta de relleno (1,5:1), per
 - **Mensaje** (`role="status"`): 16 px, peso 600, tinta, centrado, `min-block-size: 2lh` (3 lh en estrecho), como ahora.
 - **Instrucciones**: 16 px, **tinta plena**, `max-inline-size: 60ch`, centradas como el resto de la columna de juego. Se mantienen los dos textos según `pointer: coarse`.
 
-### 6.8 Cabecera, fotografía y pie
+### 6.8 Cabecera, fotografía y crédito
 
 - **Cabecera** (`.cabecera`): `display: flex; flex-direction: column; gap: var(--espacio-2)`, `padding-block-start: var(--espacio-3)` para que el título no toque el borde superior, alineada a la izquierda, **sin `border-block-end`**. `h1` "Tablero" en serifa a `--texto-titulo`. Lema a `--texto-lema`, tinta plena, nuevo texto: **"Una fila, un tipo de azulejo"** (28 caracteres, una línea en todos los anchos).
-- **Fotografía** (`img.zocalo`): elemento propio de la rejilla `.app`, en el DOM entre el `aside` y el `footer`, colocado por su área justo debajo de la cabecera. Es una banda de lado a lado de la página (ocupa las dos columnas), de alto `clamp(6rem, 11vw, 10rem)` y recortada con `object-fit: cover; object-position: 50% 60%`. En una columna llega hasta los bordes de la pantalla y baja a 4,5 rem. Se ve real y a color, sin filtros, sin velo ni texto encima y sin redondear.
+- **Fotografía** (`img.zocalo`): elemento propio de la rejilla `.app`, en el DOM tras el `aside`, colocado por su área justo debajo de la cabecera. Es una banda de lado a lado de la página (ocupa las dos columnas), de alto `clamp(6rem, 11vw, 10rem)` y recortada con `object-fit: cover; object-position: 50% 60%`. En una columna llega hasta los bordes de la pantalla y baja a 4,5 rem. Se ve real y a color, sin filtros, sin velo ni texto encima y sin redondear.
 
 ```html
 <img class="zocalo" src="img/zocalo-plaza-espana.jpg" width="1440" height="330"
@@ -449,16 +449,10 @@ Una ficha ocre sobre vidriado de cenefa apenas contrasta de relleno (1,5:1), per
      decoding="async">
 ```
 
-- **Pie** (`.pie`): sin `border-block-start`; `margin-block-start: var(--espacio-4)`; alineado a la izquierda; `--texto-nota` en `--comp-texto-suave`. Dos líneas: el grupo y el crédito, con enlaces subrayados (los enlaces dentro de texto siempre subrayados):
+- **Crédito**: no hay pie de página. El crédito de la foto (obra, autor enlazado, licencia y "recortada") va como `<p class="nota">` al final del diálogo de ayuda, con los enlaces subrayados:
 
 ```html
-<footer class="pie">
-  <p>Grupo Dinamarca · IPO 2026/27</p>
-  <p>Foto del zócalo: <a href="https://commons.wikimedia.org/wiki/File:Banco_caceres_plaza_espa%C3%B1a_2018001.jpg">«Banco caceres plaza españa 2018001»</a>,
-    banco de Cáceres en la Plaza de España (Sevilla), de <a href="https://commons.wikimedia.org/wiki/User:Anual">Anual</a>
-    en Wikimedia Commons, con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es">CC BY-SA 4.0</a>.
-    Recortada a la franja inferior del banco y reducida a 1440 px de ancho.</p>
-</footer>
+<p class="nota">Foto del zócalo: <a href="https://commons.wikimedia.org/wiki/File:Banco_caceres_plaza_espa%C3%B1a_2018001.jpg">«Banco caceres plaza españa 2018001»</a>, de <a href="https://commons.wikimedia.org/wiki/User:Anual">Anual</a> en Wikimedia Commons, con licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es">CC BY-SA 4.0</a>. Recortada y reducida.</p>
 ```
 
 ### 6.9 Diálogos y victoria: la cartela
@@ -482,21 +476,20 @@ grid-template-rows: auto auto 1fr auto;
 grid-template-areas:
   "cabecera cabecera"
   "zocalo   zocalo"
-  "juego    panel"
-  "pie      pie";
+  "juego    panel";
 
 /* < 48rem */
 grid-template-columns: minmax(0, 1fr);
-grid-template-areas: "cabecera" "zocalo" "juego" "panel" "pie";
+grid-template-areas: "cabecera" "zocalo" "juego" "panel";
 ```
 
 **1440 px.** Página de 78 rem centrada. Arriba a la izquierda, "Tablero" a 90 px en serifa y el lema debajo. Bajo la cabecera, la foto del zócalo como banda de unos 1250 × 158 px a todo el ancho de la página. Debajo, el juego: marcador, el paño 5 × 5 mediano (unos 414 × 375 px) centrado en su columna de unos 830 px, la barra de acciones, el mensaje y las instrucciones; a su derecha, el panel. El tablero y la barra de acciones caben en 900 px de alto; el mensaje y las instrucciones quedan justo por debajo. El paño oscuro con piezas blancas es lo que más pesa; la banda del zócalo y el título lo enmarcan por arriba.
 
 **768 px.** Mismo esquema de dos columnas (48 rem justos). Título a unos 62 px y banda del zócalo de unos 96 px de alto. La columna de juego mide unos 352 px y la celda se ajusta sola con `cqi` (unos 50 px en 5 × 5).
 
-**390 px.** Una columna. Título a 51 px (mínimo del `clamp`), lema a 21 px y, debajo, la banda del zócalo a sangre (`margin-inline: calc(-1 * var(--espacio-3))`, que anula exactamente el relleno de `.app`) y de 4,5 rem de alto. Luego el marcador en una línea, el paño con celdas de unos 51 px, las acciones en 2 × 2, el mensaje y las instrucciones, el panel y, al final, el pie con el crédito. La primera pantalla de un móvil de 844 px de alto llega hasta los botones de acción.
+**390 px.** Una columna. Título a 51 px (mínimo del `clamp`), lema a 21 px y, debajo, la banda del zócalo a sangre (`margin-inline: calc(-1 * var(--espacio-3))`, que anula exactamente el relleno de `.app`) y de 4,5 rem de alto. Luego el marcador en una línea, el paño con celdas de unos 51 px, las acciones en 2 × 2, el mensaje y las instrucciones, y el panel. La primera pantalla de un móvil de 844 px de alto llega hasta los botones de acción.
 
-Orden de tabulación: el del HTML (cabecera, juego, panel, pie). La foto se ve bajo la cabecera, pero en el DOM está entre el panel y el pie; como no es interactiva y el crédito enlazado está en el pie, el foco no salta.
+Orden de tabulación: el del HTML (cabecera, juego, panel). La foto se ve bajo la cabecera, pero en el DOM va después del panel; como no es interactiva, el foco no salta.
 
 ---
 
@@ -543,7 +536,7 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 - Degradados de fondo, en botones o en texto. Los gradientes solo dibujan el motivo del azulejo.
 - Cristal (`backdrop-filter`), emojis, cursores propios, fuentes descargadas, monoespaciada.
 - Más de dos familias tipográficas; palabras destacadas con otro estilo dentro de un título.
-- Texto corrido por debajo de 16 px o en gris claro. Los 14 px quedan solo para el pie.
+- Texto corrido por debajo de 16 px o en gris claro. Los 14 px quedan para notas y el crédito.
 - Negro puro (`#000`).
 - Una ficha que se distinga solo por el color, o un motivo sin cuerda seca.
 - Signos de admiración en los textos de éxito que se escriben en el HTML.
@@ -575,7 +568,6 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 - `.cabecera`: columna flex, sin borde.
 - `.cabecera`: respiro superior `--espacio-3`.
 - `.zocalo`: banda a todo el ancho bajo la cabecera, recortada con `object-fit: cover`; a sangre y de 4,5 rem por debajo de 48 rem.
-- `.pie`: sin borde, a la izquierda, `--texto-nota`, `--comp-texto-suave`, `margin-block-start: var(--espacio-4)`.
 
 **`css/components.css`**
 - Cabecera (título en serifa y lema), panel (campo sin borde), etiquetas, `select`, segmentado (juntas), muestras, botones, marcador, mensaje, instrucciones, paño, filas, celda con su matriz de estados, insignia ⇄, ✓, ficha en tres capas y las seis formas con `--motivo`, cenefa, victoria, diálogos y `forced-colors`.
@@ -586,9 +578,9 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 **`index.html`**
 - `theme-color`: claro `#f8f6f2`, oscuro `#111522`.
 - Lema: "Una fila, un tipo de azulejo".
-- Añadir `<img class="zocalo">` entre `</aside>` y `<footer>` (6.8).
+- Añadir `<img class="zocalo">` tras `</aside>` (6.8).
 - Clase `marcador__par` en los dos pares del marcador (6.7).
-- Pie con el crédito completo: título de la obra, autor enlazado, licencia y cambios (6.8).
+- Crédito completo en el diálogo de ayuda: título de la obra, autor enlazado, licencia y cambios (6.8).
 - Título de la victoria: "Tablero completado".
 - Texto del punto "Ayudas" del diálogo (6.9).
 
@@ -638,7 +630,7 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 - **Espacial:** los radios dejan de ser concéntricos (2 px y 4 px, arista de azulejo); añadir `--espacio-1` y `--espacio-5`; añadir cierre y continuidad a la lista de principios de la Gestalt (lazo y cenefa) y reformular la figura y el fondo (piezas blancas sobre paño de cobalto).
 - **Interacción y usabilidad:** cambiar las descripciones de estado: la celda seleccionada ya no "se oscurece", pasa a vidriado azul pálido con anillo interior de cobalto; el destino tiene anillo ocre e insignia ⇄; el origen, contorno discontinuo de cobalto. "Una fila que se completa se ilumina" pasa a "sus esquinas se enlazan en cenefa de izquierda a derecha".
 - **Recursos de CSS:** añadir `--motivo` con tres capas y la apotema para un contorno uniforme, `sibling-index()` como mejora progresiva y el borde de `ButtonText` de botones y segmentado en `forced-colors`.
-- **Buenas prácticas:** imagen con `width`/`height` (sin saltos de maquetación) y `alt` descriptivo; crédito y licencia en el pie.
+- **Buenas prácticas:** imagen con `width`/`height` (sin saltos de maquetación) y `alt` descriptivo; crédito y licencia en el diálogo de ayuda.
 - Nueva sección corta **Créditos** con la foto.
 
 ---
@@ -648,7 +640,7 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 - **Fichero:** `img/zocalo-plaza-espana.jpg`, 1440 × 330 px, 213 KB.
 - **Original:** "Banco caceres plaza españa 2018001", de **Anual**, 4 de enero de 2018. <https://commons.wikimedia.org/wiki/File:Banco_caceres_plaza_espa%C3%B1a_2018001.jpg>
 - **Licencia:** CC BY-SA 4.0 (<https://creativecommons.org/licenses/by-sa/4.0/>). Exige atribución, y la versión modificada se comparte con la misma licencia.
-- **Modificación:** recortada a la franja inferior del banco (filas 840 a 1280 de la versión de 1920 × 1280: cenefa de roleos, asiento y cenefas del frente) y reducida a 1440 px de ancho. Como es una obra derivada, el fichero recortado queda también bajo CC BY-SA 4.0; el resto del proyecto no se ve afectado. El pie lo indica ("Recortada y reducida").
+- **Modificación:** recortada a la franja inferior del banco (filas 840 a 1280 de la versión de 1920 × 1280: cenefa de roleos, asiento y cenefas del frente) y reducida a 1440 px de ancho. Como es una obra derivada, el fichero recortado queda también bajo CC BY-SA 4.0; el resto del proyecto no se ve afectado. El crédito lo indica ("Recortada y reducida").
 - **Por qué esta:** es de la Plaza de España, muestra juntas, cenefas y la paleta exacta del sistema (cobalto, ocre, verde, manganeso sobre estaño) y no tiene personas, escudos ni rótulos que distraigan. Se descartaron los paneles de Triana (temas religiosos o conmemorativos) y los paneles pictóricos de provincias (escena figurativa, poco patrón).
 
 ---
@@ -666,7 +658,7 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 | El vidriado de selección tapa la cenefa en una fila completa | Es intencionado: la selección manda. La ✓ y el filete siguen indicando que la fila está completa |
 | `sibling-index()` sin soporte | Declaración aparte; sin soporte, la cenefa aparece entera de una vez |
 | La imagen de arrastre (`setDragImage`) no pinta los pseudoelementos en algún navegador | Probar en Firefox y Chrome; en el peor caso se arrastra la silueta de cuerda seca, que sigue siendo la forma correcta |
-| Licencia de la foto | Crédito con autor, enlace, licencia y "recortada" en el pie; anotado en el README |
+| Licencia de la foto | Crédito con autor, enlace, licencia y "recortada" en el diálogo de ayuda; anotado en el README |
 | Coste de la foto en móvil (213 KB al final de la página) | `width`/`height` fijos y `decoding="async"`; está por debajo del límite de 250 KB |
 | Pérdida de lo que funciona | Checklist de verificación tras implementar: subgrid, container queries (22 rem, 34 rem, 48 rem), FLIP, `@starting-style`, `forced-colors`, `prefers-contrast`, `prefers-reduced-motion`, roles, foco frente a selección, ⇄, ✓, 44 px; comprobado con playwright-cli en 1440, 768 y 390, claro y oscuro |
 
@@ -679,4 +671,4 @@ Solo `transform`, `scale`, `translate` y `opacity`, salvo los cambios de color d
 - [ ] Ninguna línea fina, tarjeta con borde de 1 px, etiqueta en mayúsculas ni sombra en reposo.
 - [ ] Todo el texto corrido a 16 px o más; contrastes de 3.5 verificados en el navegador.
 - [ ] Cada tipo se distingue por forma y color, y también en escala de grises.
-- [ ] La foto se ve en 1440, 768 y 390 con su crédito en el pie.
+- [ ] La foto se ve en 1440, 768 y 390 con su crédito en la ayuda.
