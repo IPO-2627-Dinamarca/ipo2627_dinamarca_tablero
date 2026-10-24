@@ -33,6 +33,14 @@ export class VistaTablero {
     this.#tablero.addEventListener("dragend", () => this.#limpiarArrastre());
     this.#tablero.addEventListener("focusin", (e) => this.#recordarFoco(e));
     this.#tablero.addEventListener("keydown", (e) => this.#navegar(e));
+    // Un archivo soltado fuera del tablero no debe sacar al usuario de la página.
+    for (const tipo of ["dragover", "drop"]) {
+      document.addEventListener(tipo, (e) => {
+        if (this.#tablero.contains(e.target)) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+      });
+    }
   }
 
   /** Redibuja el tablero; si viene un intercambio, las dos fichas se desplazan a su nuevo sitio. */
